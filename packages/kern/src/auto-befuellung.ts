@@ -109,7 +109,7 @@ const REGELN: KalkRegel[] = [
   { keywords: ["rinne"], keywords_oder: ["abbrechen"], Y: 10, Z: 15, kommentar: "Rinne abbrechen" },
   { keywords: ["straßenablauf"], keywords_oder: ["ausbauen"], Y: 90, Z: 25, kommentar: "Straßenablauf ausbauen §5.6" },
   { keywords: ["stutzen"], keywords_oder: ["verschließen"], Y: 30, Z: 10, kommentar: "Stutzen verschließen" },
-  { keywords: ["saugbagger"], X: 150, Y: 0, Z: 0, kommentar: "Saugbagger Stundensatz" },
+  { keywords: ["saugbagger"], M: 150, Y: 0, Z: 0, kommentar: "Saugbagger NU-Stundensatz" },
   { keywords: ["mauerwerk"], keywords_oder: ["abbruch", "abbrechen"], Y: 30, Z: 25, kommentar: "Mauerwerk abbruch §5.4" },
   { keywords: ["beton"], keywords_oder: ["aufbrechen", "abbruch", "abbrechen"], keywords_nicht: ["pflaster", "platten", "verbund", "waschbeton"], Y: 45, Z: 25, kommentar: "Beton unbewehrt abbrechen §5.4" },
   { keywords: ["stahlbeton"], keywords_oder: ["abbruch", "abbrechen"], Y: 90, Z: 25, kommentar: "Stahlbeton abbrechen §5.4" },
