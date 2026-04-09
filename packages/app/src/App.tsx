@@ -8,7 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
-import { autoBefuellung } from "@baukalk/kern";
+import { autoBefuellung, wendeModifierAn, scanModifier, type ModifierKeywords } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
@@ -63,6 +63,29 @@ export function App(): React.JSX.Element {
           werte.set(t.oz, t.input);
           befuellt++;
         }
+      }
+
+      // Modifier-Keywords anwenden (NU-Trigger, Vorhalte etc.)
+      try {
+        const kwRaw = await window.baukalk.vorgabenLaden(
+          `${process.cwd()}/vorgaben/modifier-keywords.json`,
+        );
+        if (kwRaw) {
+          const keywords = kwRaw as ModifierKeywords;
+          for (const e of lv.eintraege) {
+            if (e.art === "BEREICH") continue;
+            const modTreffer = scanModifier(e.kurztext, e.langtext, e.einheit, keywords);
+            if (modTreffer.length > 0) {
+              const bestehendeWerte = werte.get(e.oz) ?? {};
+              const ergebnis = wendeModifierAn(bestehendeWerte, modTreffer);
+              if (ergebnis.aenderungen.length > 0) {
+                werte.set(e.oz, ergebnis.input);
+              }
+            }
+          }
+        }
+      } catch {
+        // Modifier-Keywords nicht verfügbar — kein Fehler
       }
 
       const parameter: Parameter = {
@@ -444,20 +467,47 @@ function ProjekteSeite(props: {
 
 // ─── Vorgaben-Seite ───
 function VorgabenSeite(): React.JSX.Element {
-  const [tab, setTab] = useState<"zeitwerte" | "uebersicht">("zeitwerte");
+  const [tab, setTab] = useState<"zeitwerte" | "plausi" | "modifier" | "profile" | "uebersicht">("zeitwerte");
 
   return (
     <div>
       <h1 style={{ fontSize: 24, marginBottom: 16 }}>Vorgaben (Admin-Panel)</h1>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-        <TabBtn label="Zeitwerte editieren" aktiv={tab === "zeitwerte"} onClick={() => setTab("zeitwerte")} />
+      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+        <TabBtn label="Zeitwerte" aktiv={tab === "zeitwerte"} onClick={() => setTab("zeitwerte")} />
+        <TabBtn label="Plausi-Regeln" aktiv={tab === "plausi"} onClick={() => setTab("plausi")} />
+        <TabBtn label="Modifier" aktiv={tab === "modifier"} onClick={() => setTab("modifier")} />
+        <TabBtn label="Profile" aktiv={tab === "profile"} onClick={() => setTab("profile")} />
         <TabBtn label="Übersicht" aktiv={tab === "uebersicht"} onClick={() => setTab("uebersicht")} />
       </div>
 
       {tab === "zeitwerte" && (
         <VorgabenEditor vorgabenPfad={`${process.cwd()}/vorgaben/gewerke/rohbau.json`} />
+      )}
+
+      {tab === "plausi" && (
+        <JsonEditor
+          titel="Plausi-Regeln"
+          pfad={`${process.cwd()}/vorgaben/plausi-regeln.json`}
+          beschreibung="Deklarative Regeln die nach jeder Position geprüft werden (FAIL/WARN)."
+        />
+      )}
+
+      {tab === "modifier" && (
+        <JsonEditor
+          titel="Modifier-Keywords"
+          pfad={`${process.cwd()}/vorgaben/modifier-keywords.json`}
+          beschreibung="NU-Trigger, Erschwernis-Trigger, Vorhalte-Trigger, Reine-Arbeitsleistung-Keywords."
+        />
+      )}
+
+      {tab === "profile" && (
+        <JsonEditor
+          titel="Kalkulationsprofile"
+          pfad={`${process.cwd()}/vorgaben/profile.json`}
+          beschreibung="Scharf / Normal / Großzügig mit allen Parametersätzen."
+        />
       )}
 
       {tab === "uebersicht" && (
@@ -470,6 +520,61 @@ function VorgabenSeite(): React.JSX.Element {
           <VorgabenKarte titel="Preisquellen" beschreibung="Waterfall: Angebote → Stammdaten → Erfahrung → Web" />
         </div>
       )}
+    </div>
+  );
+}
+
+/** Einfacher JSON-Editor für beliebige Vorgaben-Dateien. */
+function JsonEditor(props: { titel: string; pfad: string; beschreibung: string }): React.JSX.Element {
+  const [json, setJson] = useState<string>("");
+  const [laden, setLaden] = useState(true);
+  const [gespeichert, setGespeichert] = useState(false);
+
+  React.useEffect(() => {
+    (async () => {
+      const raw = await window.baukalk.vorgabenLaden(props.pfad);
+      if (raw) setJson(JSON.stringify(raw, null, 2));
+      setLaden(false);
+    })();
+  }, [props.pfad]);
+
+  const handleSpeichern = async () => {
+    try {
+      const parsed = JSON.parse(json);
+      await window.baukalk.vorgabenSpeichern(props.pfad, parsed);
+      setGespeichert(true);
+      setTimeout(() => setGespeichert(false), 2000);
+    } catch (err) {
+      alert(`JSON-Fehler: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  if (laden) return <p>Lade...</p>;
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <div>
+          <h2 style={{ fontSize: 18, margin: 0 }}>{props.titel}</h2>
+          <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>{props.beschreibung}</p>
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {gespeichert && <span style={{ color: "#059669", fontSize: 13 }}>Gespeichert!</span>}
+          <button onClick={handleSpeichern} style={{ padding: "8px 16px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 6, fontSize: 13, cursor: "pointer" }}>
+            Speichern
+          </button>
+        </div>
+      </div>
+      <textarea
+        value={json}
+        onChange={(e) => { setJson(e.target.value); setGespeichert(false); }}
+        style={{
+          width: "100%", height: "calc(100vh - 280px)", padding: 12,
+          fontFamily: "monospace", fontSize: 12, border: "1px solid #e2e8f0",
+          borderRadius: 8, resize: "vertical", background: "#fafafa",
+        }}
+        spellCheck={false}
+      />
     </div>
   );
 }

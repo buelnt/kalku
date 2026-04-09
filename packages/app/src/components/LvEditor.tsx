@@ -10,7 +10,7 @@
 import React, { useMemo } from "react";
 import { Decimal, runden } from "@baukalk/datenmodell";
 import type { LvEintrag, Parameter, PositionRechenInput } from "@baukalk/datenmodell";
-import { berechne, pruefePlausi, scanModifier, type PlausiRegel, type ModifierKeywords, type PlausiErgebnis, type ModifierTreffer } from "@baukalk/kern";
+import { berechne, pruefePlausi, scanModifier, bildePositionsGruppen, type PlausiRegel, type ModifierKeywords, type PlausiErgebnis, type ModifierTreffer, type PositionsGruppe } from "@baukalk/kern";
 
 interface LvEditorProps {
   eintraege: LvEintrag[];
@@ -99,6 +99,21 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
     return map;
   }, [eintraege, modifierKeywords]);
 
+  // Positions-Gruppen (Mischkalkulations-Warnung)
+  const gruppenMap = useMemo(() => {
+    const gruppen = bildePositionsGruppen(eintraege);
+    const map = new Map<string, PositionsGruppe>();
+    for (const g of gruppen) {
+      for (const oz of g.mitglieder_oz) {
+        map.set(oz, g);
+      }
+      for (const ek of g.entkoppelte) {
+        map.set(ek.oz, g);
+      }
+    }
+    return map;
+  }, [eintraege]);
+
   // Netto-Summe
   const nettoSumme = useMemo(() => {
     let sum = new Decimal(0);
@@ -163,9 +178,21 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
               const b = berechnungen.get(e.oz);
               if (!b) return null;
 
+              const gruppe = gruppenMap.get(e.oz);
+
               return (
-                <tr key={e.oz} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <Td>{e.oz}</Td>
+                <tr key={e.oz} style={{ borderBottom: "1px solid #f1f5f9", background: gruppe ? "#fffbeb" : undefined }}>
+                  <Td>
+                    {e.oz}
+                    {gruppe && (
+                      <span
+                        title={`Gruppe: ${gruppe.mitglieder_oz.join(", ")} — EP muss identisch sein (Mischkalkulations-Schutz)`}
+                        style={{ fontSize: 10, color: "#d97706", marginLeft: 4, cursor: "help" }}
+                      >
+                        ⚠G
+                      </span>
+                    )}
+                  </Td>
                   <Td title={e.langtext}>{e.kurztext}</Td>
                   <Td right>{e.menge != null ? Number(e.menge) : ""}</Td>
                   <Td>{e.einheit}</Td>
