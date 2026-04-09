@@ -50,7 +50,13 @@ export function registerIpcHandlers(): void {
       );
     }
 
-    return lv;
+    // Decimal-Instanzen in plain numbers konvertieren für IPC (structured clone)
+    return JSON.parse(JSON.stringify(lv, (_key, value) => {
+      if (value && typeof value === "object" && value.constructor?.name === "Decimal") {
+        return Number(value.toString());
+      }
+      return value;
+    }));
   });
 
   // ─── Excel Exportieren ───

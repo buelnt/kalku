@@ -26,6 +26,17 @@ export default defineConfig({
         onstart(args) {
           args.reload();
         },
+        vite: {
+          build: {
+            outDir: "dist-electron",
+            rollupOptions: {
+              output: {
+                format: "cjs",
+                entryFileNames: "preload.js",
+              },
+            },
+          },
+        },
       },
     ]),
     renderer(),

@@ -24,6 +24,13 @@ interface LvEditorProps {
 
 const NULL = new Decimal(0);
 
+/** Konvertiert einen beliebigen Wert (number, string, Decimal, null) sicher zu Decimal. */
+function toDec(v: unknown): Decimal {
+  if (v instanceof Decimal) return v;
+  if (v === null || v === undefined) return NULL;
+  try { return new Decimal(v as string | number); } catch { return NULL; }
+}
+
 function formatEuro(d: Decimal): string {
   return runden(d).toNumber().toLocaleString("de-DE", {
     minimumFractionDigits: 2,
@@ -32,15 +39,32 @@ function formatEuro(d: Decimal): string {
 }
 
 export function LvEditor(props: LvEditorProps): React.JSX.Element {
-  const { eintraege, parameter, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk } = props;
+  const { eintraege, parameter: rawParams, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk } = props;
+
+  // Parameter sicher als Decimal (könnten als plain numbers über IPC kommen)
+  const parameter = useMemo<Parameter>(() => ({
+    verrechnungslohn: toDec(rawParams.verrechnungslohn),
+    lohn_ek: rawParams.lohn_ek ? toDec(rawParams.lohn_ek) : undefined,
+    material_zuschlag: toDec(rawParams.material_zuschlag),
+    nu_zuschlag: toDec(rawParams.nu_zuschlag),
+    geraete_grundzuschlag: rawParams.geraete_grundzuschlag ? toDec(rawParams.geraete_grundzuschlag) : undefined,
+    zeitwert_faktor: toDec(rawParams.zeitwert_faktor),
+    geraetezulage_default: toDec(rawParams.geraetezulage_default),
+  }), [rawParams]);
 
   // EP/GP für alle Positionen berechnen
   const berechnungen = useMemo(() => {
     const map = new Map<string, ReturnType<typeof berechne>>();
     for (const e of eintraege) {
       if (e.art === "BEREICH") continue;
-      const input = werte.get(e.oz) ?? {};
-      const menge = e.menge ?? NULL;
+      const raw = werte.get(e.oz) ?? {};
+      const input: PositionRechenInput = {
+        stoffe_ek: raw.stoffe_ek ? toDec(raw.stoffe_ek) : undefined,
+        zeit_min_roh: raw.zeit_min_roh ? toDec(raw.zeit_min_roh) : undefined,
+        geraetezulage_eur_h: raw.geraetezulage_eur_h ? toDec(raw.geraetezulage_eur_h) : undefined,
+        nu_ek: raw.nu_ek ? toDec(raw.nu_ek) : undefined,
+      };
+      const menge = toDec(e.menge);
       map.set(e.oz, berechne(input, menge, parameter));
     }
     return map;
