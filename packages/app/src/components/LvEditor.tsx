@@ -20,6 +20,8 @@ interface LvEditorProps {
   plausiRegeln?: PlausiRegel[];
   modifierKeywords?: ModifierKeywords;
   gewerk?: string;
+  /** Quellen-Info pro Position (für Farbkennzeichnung der Stoffe-Spalte). */
+  quellenMap?: Map<string, { quelle: string; farbe: string; beschreibung: string }>;
 }
 
 const NULL = new Decimal(0);
@@ -40,7 +42,7 @@ function formatEuro(d: Decimal | number): string {
 }
 
 export function LvEditor(props: LvEditorProps): React.JSX.Element {
-  const { eintraege, parameter: rawParams, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk } = props;
+  const { eintraege, parameter: rawParams, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk, quellenMap } = props;
 
   // Parameter sicher als Decimal (könnten als plain numbers über IPC kommen)
   const parameter = useMemo<Parameter>(() => ({
@@ -197,10 +199,18 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
                   <Td right>{e.menge != null ? Number(e.menge) : ""}</Td>
                   <Td>{e.einheit}</Td>
                   <Td right>
-                    <NumInput
-                      wert={input.stoffe_ek != null ? Number(input.stoffe_ek) : undefined}
-                      onChange={(v) => onWertAendern(e.oz, "stoffe_ek", v)}
-                    />
+                    {(() => {
+                      const qi = quellenMap?.get(e.oz);
+                      const bgColor = qi?.farbe === "gruen" ? "#dcfce7" : qi?.farbe === "gelb" ? "#fefce8" : qi?.farbe === "rot" ? "#fef2f2" : undefined;
+                      return (
+                        <NumInput
+                          wert={input.stoffe_ek != null ? Number(input.stoffe_ek) : undefined}
+                          onChange={(v) => onWertAendern(e.oz, "stoffe_ek", v)}
+                          hintergrund={bgColor}
+                          tooltip={qi?.beschreibung}
+                        />
+                      );
+                    })()}
                   </Td>
                   <Td right>
                     <NumInput
@@ -328,11 +338,14 @@ function Td(p: {
 function NumInput(p: {
   wert: number | undefined;
   onChange: (v: number | undefined) => void;
+  hintergrund?: string;
+  tooltip?: string;
 }): React.JSX.Element {
   return (
     <input
       type="number"
       step="0.01"
+      title={p.tooltip}
       value={p.wert ?? ""}
       onChange={(e) => {
         const v = e.target.value;
@@ -345,7 +358,7 @@ function NumInput(p: {
         borderRadius: 3,
         fontSize: 12,
         textAlign: "right",
-        background: p.wert !== undefined ? "#fefce8" : "#fff",
+        background: p.hintergrund ?? (p.wert !== undefined ? "#fefce8" : "#fff"),
       }}
     />
   );

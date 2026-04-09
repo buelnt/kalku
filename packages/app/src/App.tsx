@@ -32,6 +32,7 @@ export function App(): React.JSX.Element {
   const [zeigeKorrekturDialog, setZeigeKorrekturDialog] = useState(false);
   const [initialWerte, setInitialWerte] = useState<Map<string, PositionRechenInput>>(new Map());
   const [kunde, setKunde] = useState("");
+  const [quellenMapState, setQuellenMapState] = useState<Map<string, { quelle: string; farbe: string; beschreibung: string }>>(new Map());
 
   // Profil-Presets
   const profile = {
@@ -115,8 +116,9 @@ export function App(): React.JSX.Element {
         geraetezulage_default: new Decimal(parameterForm.geraetezulage_default),
       };
 
-      // Initial-Werte merken für den Korrektur-Dialog
+      // Initial-Werte und Quellen merken
       setInitialWerte(new Map(werte));
+      setQuellenMapState(quellenMap);
 
       setProjekt({
         name: lv.meta.original_datei,
@@ -344,6 +346,7 @@ export function App(): React.JSX.Element {
               parameter={projekt.parameter}
               werte={projekt.werte}
               onWertAendern={handleWertAendern}
+              quellenMap={quellenMapState}
             />
             {/* Korrektur-Dialog */}
             {zeigeKorrekturDialog && (() => {
