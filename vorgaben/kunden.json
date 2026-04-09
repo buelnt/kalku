@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "kunden": [
+    {
+      "id": "gesellchen",
+      "name": "Gesellchen GmbH",
+      "ordner": "/Users/admin/Library/CloudStorage/OneDrive-kalku/KT01/1695_Gesellchen_GmbH",
+      "angebote_unterordner": "04_Angebote",
+      "overrides": {},
+      "erstellt_am": "2026-04-09",
+      "notizen": "Tiefbau, GaLaBau, Straßenbau — Standardkunde"
+    }
+  ]
+}

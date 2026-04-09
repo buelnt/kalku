@@ -12,6 +12,7 @@ import { autoBefuellung, wendeModifierAn, scanModifier, type ModifierKeywords } 
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
+import { KundenVerwaltung } from "./components/KundenVerwaltung.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -462,13 +463,9 @@ function ProjekteSeite(props: {
 
       {/* Kunde */}
       <div style={{ ...cardStyle, marginBottom: 16 }}>
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>Kunde</h2>
-        <input
-          type="text"
-          placeholder="Kundenname eingeben (z.B. Gesellchen GmbH)"
-          value={kunde}
-          onChange={(e) => onKundeAendern(e.target.value)}
-          style={inputStyle}
+        <KundenVerwaltung
+          aktuellerKunde={kunde}
+          onKundeGewaehlt={(k) => onKundeAendern(k.name)}
         />
       </div>
 
