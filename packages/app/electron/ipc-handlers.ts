@@ -199,6 +199,16 @@ export function registerIpcHandlers(): void {
     },
   );
 
+  // ─── Audit-Log ───
+  ipcMain.handle("audit:schreiben", async (_event, jsonlZeile: string) => {
+    const logPfad = join(process.cwd(), "vorgaben", "audit-log.jsonl");
+    const dir = join(logPfad, "..");
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    const { appendFileSync } = await import("node:fs");
+    appendFileSync(logPfad, jsonlZeile, "utf-8");
+    return true;
+  });
+
   // ─── Vorgaben laden ───
   ipcMain.handle("vorgaben:laden", async (_event, pfad: string) => {
     if (!existsSync(pfad)) return null;

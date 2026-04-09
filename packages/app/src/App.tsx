@@ -14,6 +14,7 @@ import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
 import { KundenVerwaltung } from "./components/KundenVerwaltung.js";
 import { NutzerAuswahl, type Nutzer } from "./components/NutzerAuswahl.js";
+import { ApprovalQueue } from "./components/ApprovalQueue.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -501,7 +502,7 @@ export function App(): React.JSX.Element {
             </p>
           </div>
         )}
-        {seite === "vorgaben" && <VorgabenSeite />}
+        {seite === "vorgaben" && <VorgabenSeite nutzer={aktuellerNutzer} />}
       </main>
     </div>
   );
@@ -588,8 +589,8 @@ function ProjekteSeite(props: {
 }
 
 // ─── Vorgaben-Seite ───
-function VorgabenSeite(): React.JSX.Element {
-  const [tab, setTab] = useState<"zeitwerte" | "plausi" | "modifier" | "profile" | "uebersicht">("zeitwerte");
+function VorgabenSeite(props: { nutzer: Nutzer | null }): React.JSX.Element {
+  const [tab, setTab] = useState<"zeitwerte" | "plausi" | "modifier" | "profile" | "freigaben" | "uebersicht">("zeitwerte");
 
   return (
     <div>
@@ -601,6 +602,7 @@ function VorgabenSeite(): React.JSX.Element {
         <TabBtn label="Plausi-Regeln" aktiv={tab === "plausi"} onClick={() => setTab("plausi")} />
         <TabBtn label="Modifier" aktiv={tab === "modifier"} onClick={() => setTab("modifier")} />
         <TabBtn label="Profile" aktiv={tab === "profile"} onClick={() => setTab("profile")} />
+        <TabBtn label="Freigaben" aktiv={tab === "freigaben"} onClick={() => setTab("freigaben")} />
         <TabBtn label="Übersicht" aktiv={tab === "uebersicht"} onClick={() => setTab("uebersicht")} />
       </div>
 
@@ -629,6 +631,13 @@ function VorgabenSeite(): React.JSX.Element {
           titel="Kalkulationsprofile"
           pfad={`${process.cwd()}/vorgaben/profile.json`}
           beschreibung="Scharf / Normal / Großzügig mit allen Parametersätzen."
+        />
+      )}
+
+      {tab === "freigaben" && (
+        <ApprovalQueue
+          istSenior={props.nutzer?.rolle === "senior"}
+          nutzerName={props.nutzer?.name ?? "Unbekannt"}
         />
       )}
 

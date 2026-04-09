@@ -13,3 +13,4 @@ export * from "./plausi.js";
 export * from "./auto-befuellung.js";
 export * from "./preis-waterfall.js";
 export * from "./angebots-extraktor.js";
+export * from "./audit-log.js";
