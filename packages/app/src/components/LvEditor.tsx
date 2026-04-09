@@ -31,8 +31,9 @@ function toDec(v: unknown): Decimal {
   try { return new Decimal(v as string | number); } catch { return NULL; }
 }
 
-function formatEuro(d: Decimal): string {
-  return runden(d).toNumber().toLocaleString("de-DE", {
+function formatEuro(d: Decimal | number): string {
+  const dec = d instanceof Decimal ? d : new Decimal(d ?? 0);
+  return runden(dec).toNumber().toLocaleString("de-DE", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -166,29 +167,29 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
                 <tr key={e.oz} style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <Td>{e.oz}</Td>
                   <Td title={e.langtext}>{e.kurztext}</Td>
-                  <Td right>{e.menge?.toNumber()}</Td>
+                  <Td right>{e.menge != null ? Number(e.menge) : ""}</Td>
                   <Td>{e.einheit}</Td>
                   <Td right>
                     <NumInput
-                      wert={input.stoffe_ek?.toNumber()}
+                      wert={input.stoffe_ek != null ? Number(input.stoffe_ek) : undefined}
                       onChange={(v) => onWertAendern(e.oz, "stoffe_ek", v)}
                     />
                   </Td>
                   <Td right>
                     <NumInput
-                      wert={input.zeit_min_roh?.toNumber()}
+                      wert={input.zeit_min_roh != null ? Number(input.zeit_min_roh) : undefined}
                       onChange={(v) => onWertAendern(e.oz, "zeit_min_roh", v)}
                     />
                   </Td>
                   <Td right>
                     <NumInput
-                      wert={input.geraetezulage_eur_h?.toNumber()}
+                      wert={input.geraetezulage_eur_h != null ? Number(input.geraetezulage_eur_h) : undefined}
                       onChange={(v) => onWertAendern(e.oz, "geraetezulage_eur_h", v)}
                     />
                   </Td>
                   <Td right>
                     <NumInput
-                      wert={input.nu_ek?.toNumber()}
+                      wert={input.nu_ek != null ? Number(input.nu_ek) : undefined}
                       onChange={(v) => onWertAendern(e.oz, "nu_ek", v)}
                     />
                   </Td>
