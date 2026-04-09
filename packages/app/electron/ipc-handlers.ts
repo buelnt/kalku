@@ -5,8 +5,9 @@
  * Hier laufen alle Datei-Operationen: Import, Export, Speichern, Laden.
  */
 import { ipcMain, dialog, BrowserWindow } from "electron";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { extname, join } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { extname, join, dirname } from "node:path";
+import { execSync } from "node:child_process";
 import { parseExcelLv, parseGaebD83, parseGaebXml } from "@baukalk/import";
 import { exportGaebD84 } from "@baukalk/export";
 import { exportExcelLv3 } from "@baukalk/export";
@@ -158,6 +159,43 @@ export function registerIpcHandlers(): void {
 
       writeFileSync(result.filePath, gaebStr, "latin1");
       return result.filePath;
+    },
+  );
+
+  // ─── Angebote aus Ordner scannen ───
+  ipcMain.handle(
+    "angebote:scannen",
+    async (_event, angeboteOrdner: string) => {
+      if (!existsSync(angeboteOrdner)) return [];
+
+      const ergebnisse: Array<{ datei: string; lieferant: string; text: string }> = [];
+      const scriptPfad = join(dirname(dirname(__dirname)), "scripts", "pdf-text-extract.py");
+
+      // Alle Unterordner durchgehen (ein Ordner pro Lieferant)
+      const unterordner = readdirSync(angeboteOrdner, { withFileTypes: true })
+        .filter((d) => d.isDirectory())
+        .map((d) => d.name);
+
+      for (const lieferant of unterordner) {
+        const lieferantPfad = join(angeboteOrdner, lieferant);
+        const dateien = readdirSync(lieferantPfad)
+          .filter((f) => f.toLowerCase().endsWith(".pdf") && f.toLowerCase().includes("angebot"));
+
+        for (const datei of dateien) {
+          const pdfPfad = join(lieferantPfad, datei);
+          try {
+            const text = execSync(`python3 "${scriptPfad}" "${pdfPfad}"`, {
+              timeout: 15000,
+              encoding: "utf-8",
+            });
+            ergebnisse.push({ datei, lieferant, text });
+          } catch {
+            // PDF nicht lesbar — überspringen
+          }
+        }
+      }
+
+      return ergebnisse;
     },
   );
 

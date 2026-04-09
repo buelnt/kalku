@@ -7,6 +7,7 @@ interface BaukalkApi {
   lvImportieren: () => Promise<import("@baukalk/datenmodell").LvImport | null>;
   lvExportieren: (optionen: unknown) => Promise<string | null>;
   lvGaebExportieren: (optionen: unknown) => Promise<string | null>;
+  angeboteScannen: (ordner: string) => Promise<Array<{ datei: string; lieferant: string; text: string }>>;
   vorgabenLaden: (pfad: string) => Promise<unknown>;
   vorgabenSpeichern: (pfad: string, daten: unknown) => Promise<boolean>;
   projektSpeichern: (pfad: string, daten: unknown) => Promise<boolean>;

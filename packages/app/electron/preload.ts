@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("baukalk", {
   lvImportieren: () => ipcRenderer.invoke("lv:importieren"),
   lvExportieren: (optionen: unknown) => ipcRenderer.invoke("lv:exportieren", optionen),
   lvGaebExportieren: (optionen: unknown) => ipcRenderer.invoke("lv:gaebExportieren", optionen),
+  angeboteScannen: (ordner: string) => ipcRenderer.invoke("angebote:scannen", ordner),
 
   vorgabenLaden: (pfad: string) => ipcRenderer.invoke("vorgaben:laden", pfad),
   vorgabenSpeichern: (pfad: string, daten: unknown) =>

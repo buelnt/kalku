@@ -8,7 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
-import { autoBefuellung, wendeModifierAn, scanModifier, bildePositionsGruppen, type ModifierKeywords, type PositionsGruppe } from "@baukalk/kern";
+import { autoBefuellung, wendeModifierAn, scanModifier, bildePositionsGruppen, extrahierePreise, type ModifierKeywords, type PositionsGruppe, type PreisdatenbankEintrag } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
@@ -59,8 +59,46 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      // Preisdatenbank laden
-      let preisdatenbank: Array<{ suchbegriff: string; material: string; preis_pro_einheit: number; einheit: string; quelle: string; datum: string; lieferant?: string }> = [];
+      // Schritt 1: Angebote aus Kunden-Ordner scannen (höchste Priorität)
+      let angebotePreise: PreisdatenbankEintrag[] = [];
+      if (kunde) {
+        try {
+          const kundenRaw = await window.baukalk.vorgabenLaden(
+            `${process.cwd()}/vorgaben/kunden.json`,
+          );
+          if (kundenRaw) {
+            const kunden = (kundenRaw as { kunden: Array<{ name: string; ordner: string; angebote_unterordner: string }> }).kunden;
+            const aktuellerKunde = kunden.find((k) => k.name === kunde);
+            if (aktuellerKunde?.ordner) {
+              // Angebote-Ordner aus Kunden-Ordner + Standard-Unterordner
+              setMeldung("Scanne Angebote aus Kunden-Ordner...");
+              const angeboteOrdner = `${aktuellerKunde.ordner}/${aktuellerKunde.angebote_unterordner || "04_Angebote"}`;
+              try {
+                const angeboteDateien = await window.baukalk.angeboteScannen(angeboteOrdner);
+                for (const ag of angeboteDateien) {
+                  const extPreise = extrahierePreise(ag.text, ag.lieferant);
+                  for (const ep of extPreise) {
+                    angebotePreise.push({
+                      suchbegriff: ep.material.toLowerCase().slice(0, 60),
+                      material: ep.material,
+                      preis_pro_einheit: ep.preis,
+                      einheit: ep.einheit,
+                      quelle: `Angebot ${ag.lieferant} (${ep.angebots_nr ?? ag.datei})`,
+                      datum: ep.datum ?? new Date().toISOString().slice(0, 10),
+                      lieferant: ag.lieferant,
+                    });
+                  }
+                }
+              } catch {
+                // Angebote nicht lesbar — kein Fehler
+              }
+            }
+          }
+        } catch { /* Kunden nicht verfügbar */ }
+      }
+
+      // Schritt 2: Preisdatenbank laden (zweite Priorität)
+      let preisdatenbank: PreisdatenbankEintrag[] = [...angebotePreise];
       try {
         const pdRaw = await window.baukalk.vorgabenLaden(
           `${process.cwd()}/vorgaben/preisdatenbank.json`,
