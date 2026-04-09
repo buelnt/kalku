@@ -9,6 +9,7 @@ import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
+import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -205,9 +206,22 @@ export function App(): React.JSX.Element {
               <h1 style={{ fontSize: 20 }}>
                 Kalkulation — {projekt.name}
               </h1>
-              <button onClick={handleExport} style={exportBtnStyle}>
-                Als Excel exportieren
-              </button>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <ProjektSpeichern
+                  projektName={projekt.name}
+                  kunde={projekt.kunde}
+                  lv={projekt.lv}
+                  werte={projekt.werte}
+                  parameter={projekt.parameter}
+                  onGeladen={(lv, w, p, n) => {
+                    setProjekt({ name: n, kunde: "", lv, werte: w, parameter: p });
+                  }}
+                  onMeldung={setMeldung}
+                />
+                <button onClick={handleExport} style={exportBtnStyle}>
+                  Als Excel exportieren
+                </button>
+              </div>
             </div>
             <LvEditor
               eintraege={projekt.lv.eintraege}
