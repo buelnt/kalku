@@ -2,7 +2,7 @@
   "name": "baukalk-pro",
   "version": "0.1.0",
   "private": true,
-  "description": "BauKalk Pro — Baukalkulations-Software (kalku.de)",
+  "description": "BauKalk Pro \u2014 Baukalkulations-Software (kalku.de)",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=20.0.0"
@@ -14,5 +14,11 @@
   },
   "devDependencies": {
     "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
   }
 }
