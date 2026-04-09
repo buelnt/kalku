@@ -13,14 +13,10 @@ export default defineConfig({
           build: {
             outDir: "dist-electron",
             rollupOptions: {
-              external: [
-                "electron",
-                "better-sqlite3",
-                "@baukalk/datenmodell",
-                "@baukalk/kern",
-                "@baukalk/import",
-                "@baukalk/export",
-              ],
+              // Nur echte Node-native Module als external markieren.
+              // Workspace-Pakete (@baukalk/*) werden GEBÜNDELT, damit
+              // Electron sie nicht als .ts laden muss.
+              external: ["electron", "better-sqlite3"],
             },
           },
         },

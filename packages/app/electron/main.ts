@@ -30,7 +30,8 @@ function createWindow(): void {
   // In Entwicklung: Vite Dev Server laden
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-    mainWindow.webContents.openDevTools({ mode: "right" });
+    // DevTools in Entwicklung: mit Cmd+Alt+I öffnen bei Bedarf
+    // mainWindow.webContents.openDevTools({ mode: "right" });
   } else {
     // Produktion: gebaute Dateien laden
     mainWindow.loadFile(join(__dirname, "../dist/index.html"));
