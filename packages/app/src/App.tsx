@@ -13,6 +13,7 @@ import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
 import { KundenVerwaltung } from "./components/KundenVerwaltung.js";
+import { NutzerAuswahl, type Nutzer } from "./components/NutzerAuswahl.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -35,6 +36,7 @@ export function App(): React.JSX.Element {
   const [kunde, setKunde] = useState("");
   const [quellenMapState, setQuellenMapState] = useState<Map<string, { quelle: string; farbe: string; beschreibung: string }>>(new Map());
   const [positionsGruppen, setPositionsGruppen] = useState<PositionsGruppe[]>([]);
+  const [aktuellerNutzer, setAktuellerNutzer] = useState<Nutzer | null>(null);
 
   // Profil-Presets
   const profile = {
@@ -277,6 +279,11 @@ export function App(): React.JSX.Element {
 
   return (
     <div style={{ display: "flex", height: "100vh" }}>
+      {/* Nutzer-Auswahl beim Start */}
+      {!aktuellerNutzer && (
+        <NutzerAuswahl onGewaehlt={setAktuellerNutzer} />
+      )}
+
       {/* Seitenleiste */}
       <nav style={navStyle}>
         <div style={logoStyle}>BauKalk Pro</div>
@@ -295,7 +302,8 @@ export function App(): React.JSX.Element {
           </div>
         )}
         <div style={{ padding: "10px 20px", fontSize: 11, color: "#64748b" }}>
-          v0.1.0 — kalku.de
+          {aktuellerNutzer ? `${aktuellerNutzer.name} (${aktuellerNutzer.rolle === "senior" ? "Senior" : "Junior"})` : ""}
+          <br />v0.1.0 — kalku.de
         </div>
       </nav>
 

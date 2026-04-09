@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "nutzer": [
+    {
+      "id": "master",
+      "name": "Master",
+      "email": "master@kalku.de",
+      "rolle": "senior"
+    },
+    {
+      "id": "senior2",
+      "name": "Senior Kalkulator 2",
+      "email": "senior2@kalku.de",
+      "rolle": "senior"
+    }
+  ]
+}
