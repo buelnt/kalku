@@ -130,10 +130,10 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
       </div>
 
       {/* Tabelle */}
-      <div style={{ overflow: "auto", background: "#fff", borderRadius: 8, border: "1px solid #e2e8f0" }}>
+      <div style={{ overflow: "auto", background: "#fff", borderRadius: 8, border: "1px solid #e2e8f0", maxHeight: "calc(100vh - 200px)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
-            <tr style={{ background: "#f1f5f9", position: "sticky", top: 0 }}>
+            <tr style={{ background: "#f1f5f9", position: "sticky", top: 0, zIndex: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
               <Th w={100}>Pos.</Th>
               <Th w={250}>Bezeichnung</Th>
               <Th w={60} right>Menge</Th>
@@ -266,6 +266,7 @@ function Th(p: { children: React.ReactNode; w?: number; right?: boolean }): Reac
         color: "#475569",
         borderBottom: "2px solid #e2e8f0",
         whiteSpace: "nowrap",
+        background: "#f1f5f9",
       }}
     >
       {p.children}
