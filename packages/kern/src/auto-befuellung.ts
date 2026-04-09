@@ -12,6 +12,12 @@
  */
 import { Decimal } from "@baukalk/datenmodell";
 import type { PositionRechenInput, LvEintrag } from "@baukalk/datenmodell";
+import {
+  sucheInPreisdatenbank,
+  type PreisdatenbankEintrag,
+  type PreisQuelle,
+  type PreisFarbe,
+} from "./preis-waterfall.js";
 
 export interface AutoBefuellungsTreffer {
   oz: string;
@@ -19,6 +25,10 @@ export interface AutoBefuellungsTreffer {
   quelle: string;
   konfidenz: "hoch" | "mittel" | "niedrig";
   erklaerung: string;
+  /** Preisquelle für die Stoffe (X) — für Farbkennzeichnung im Editor. */
+  stoffe_quelle?: PreisQuelle;
+  stoffe_farbe?: PreisFarbe;
+  stoffe_beschreibung?: string;
 }
 
 /**
@@ -358,9 +368,21 @@ function regelMatcht(regel: KalkRegel, volltext: string): boolean {
 
 /**
  * Befüllt Positionen automatisch mit Kalkulationswerten.
+ *
+ * Nutzt den Preisquellen-Waterfall (Interview F4, Spec §14.5):
+ * 1. Preisdatenbank (aus abgeschlossenen Kalkulationen)
+ * 2. Gewerk-Vorgaben (Leitfaden-Regeln)
+ * 3. Fallback: leer (manuell füllen)
+ *
+ * Aktuelle Projekt-Angebote (Stufe 1 im Waterfall) und Web-Recherche
+ * (Stufe 4) werden separat behandelt, weil sie externe Datenquellen sind.
+ *
+ * @param eintraege        Die LV-Einträge
+ * @param preisdatenbank   Optionale Preisdatenbank-Einträge für Stoffe-Preise
  */
 export function autoBefuellung(
   eintraege: LvEintrag[],
+  preisdatenbank?: PreisdatenbankEintrag[],
 ): AutoBefuellungsTreffer[] {
   const treffer: AutoBefuellungsTreffer[] = [];
 
@@ -370,10 +392,30 @@ export function autoBefuellung(
     const volltext = `${e.kurztext}\n${e.langtext ?? ""}`.toLowerCase();
     let matched = false;
 
+    // Schritt 1: Keyword-Regeln (Gewerk-Vorgaben) für Zeit + Geräte + Grundstruktur
     for (const regel of REGELN) {
       if (regelMatcht(regel, volltext)) {
         const input: PositionRechenInput = {};
-        if (regel.X !== undefined && regel.X > 0) input.stoffe_ek = new Decimal(regel.X);
+        let stoffeQuelle: PreisQuelle = "vorgabe";
+        let stoffeFarbe: PreisFarbe = "gelb";
+        let stoffeBeschreibung = regel.kommentar;
+
+        // Stoffe (X): zuerst in Preisdatenbank suchen, dann Regel-Default
+        if (preisdatenbank && preisdatenbank.length > 0) {
+          const dbTreffer = sucheInPreisdatenbank(volltext, preisdatenbank);
+          if (dbTreffer) {
+            input.stoffe_ek = new Decimal(dbTreffer.preis);
+            stoffeQuelle = "preisdatenbank";
+            stoffeFarbe = "gelb";
+            stoffeBeschreibung = dbTreffer.beschreibung;
+          } else if (regel.X !== undefined && regel.X > 0) {
+            input.stoffe_ek = new Decimal(regel.X);
+          }
+        } else if (regel.X !== undefined && regel.X > 0) {
+          input.stoffe_ek = new Decimal(regel.X);
+        }
+
+        // Zeit, Geräte, NU: immer aus der Regel
         if (regel.Y !== undefined && regel.Y > 0) input.zeit_min_roh = new Decimal(regel.Y);
         if (regel.Z !== undefined) input.geraetezulage_eur_h = new Decimal(regel.Z);
         if (regel.M !== undefined && regel.M > 0) input.nu_ek = new Decimal(regel.M);
@@ -383,18 +425,40 @@ export function autoBefuellung(
           input,
           quelle: regel.kommentar,
           konfidenz: "hoch",
-          erklaerung: `${regel.kommentar} → X=${regel.X ?? 0} Y=${regel.Y ?? 0} Z=${regel.Z ?? 0.5} M=${regel.M ?? 0}`,
+          erklaerung: `${regel.kommentar} → X=${input.stoffe_ek?.toString() ?? 0} Y=${regel.Y ?? 0} Z=${regel.Z ?? 0.5} M=${regel.M ?? 0}`,
+          stoffe_quelle: input.stoffe_ek ? stoffeQuelle : undefined,
+          stoffe_farbe: input.stoffe_ek ? stoffeFarbe : undefined,
+          stoffe_beschreibung: input.stoffe_ek ? stoffeBeschreibung : undefined,
         });
         matched = true;
         break;
       }
     }
 
+    // Schritt 2: Kein Keyword-Match → nur Preisdatenbank prüfen
+    if (!matched && preisdatenbank && preisdatenbank.length > 0) {
+      const dbTreffer = sucheInPreisdatenbank(volltext, preisdatenbank);
+      if (dbTreffer) {
+        treffer.push({
+          oz: e.oz,
+          input: { stoffe_ek: new Decimal(dbTreffer.preis) },
+          quelle: dbTreffer.beschreibung,
+          konfidenz: "mittel",
+          erklaerung: `Preisdatenbank: ${dbTreffer.beschreibung}`,
+          stoffe_quelle: "preisdatenbank",
+          stoffe_farbe: "gelb",
+          stoffe_beschreibung: dbTreffer.beschreibung,
+        });
+        matched = true;
+      }
+    }
+
+    // Schritt 3: Gar kein Match
     if (!matched) {
       treffer.push({
         oz: e.oz,
         input: {},
-        quelle: "Kein Match — manuell",
+        quelle: "Kein Match — manuell füllen",
         konfidenz: "niedrig",
         erklaerung: `Nicht erkannt: ${e.kurztext.slice(0, 50)}`,
       });

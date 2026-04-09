@@ -54,14 +54,33 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      // Auto-Befüllung: Positionen automatisch mit Leitfaden-Werten kalkulieren
+      // Preisdatenbank laden
+      let preisdatenbank: Array<{ suchbegriff: string; material: string; preis_pro_einheit: number; einheit: string; quelle: string; datum: string; lieferant?: string }> = [];
+      try {
+        const pdRaw = await window.baukalk.vorgabenLaden(
+          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+        );
+        if (pdRaw && typeof pdRaw === "object" && "eintraege" in (pdRaw as Record<string, unknown>)) {
+          preisdatenbank = (pdRaw as { eintraege: typeof preisdatenbank }).eintraege;
+        }
+      } catch { /* Preisdatenbank nicht verfügbar */ }
+
+      // Auto-Befüllung mit Waterfall: Preisdatenbank → Vorgaben
       const werte = new Map<string, PositionRechenInput>();
-      const treffer = autoBefuellung(lv.eintraege);
+      const quellenMap = new Map<string, { quelle: string; farbe: string; beschreibung: string }>();
+      const treffer = autoBefuellung(lv.eintraege, preisdatenbank);
       let befuellt = 0;
       for (const t of treffer) {
         if (t.konfidenz !== "niedrig") {
           werte.set(t.oz, t.input);
           befuellt++;
+          if (t.stoffe_quelle) {
+            quellenMap.set(t.oz, {
+              quelle: t.stoffe_quelle,
+              farbe: t.stoffe_farbe ?? "grau",
+              beschreibung: t.stoffe_beschreibung ?? t.quelle,
+            });
+          }
         }
       }
 
@@ -353,12 +372,53 @@ export function App(): React.JSX.Element {
               return (
                 <KorrekturDialog
                   abweichungen={abweichungen}
-                  onAbschliessen={(entscheidungen) => {
+                  onAbschliessen={async (entscheidungen) => {
                     setZeigeKorrekturDialog(false);
                     const kundeCount = entscheidungen.filter((e) => e.fuerKunde).length;
                     const globalCount = entscheidungen.filter((e) => e.fuerGlobal).length;
+
+                    // Global-Übernahmen in die Preisdatenbank schreiben
+                    if (globalCount > 0) {
+                      try {
+                        const pdRaw = await window.baukalk.vorgabenLaden(
+                          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+                        );
+                        const pd = (pdRaw as { eintraege: Array<Record<string, unknown>> } | null) ?? { eintraege: [] };
+
+                        for (const ent of entscheidungen) {
+                          if (!ent.fuerGlobal) continue;
+                          // Position finden
+                          const pos = projekt.lv.eintraege.find((p) => p.oz === ent.oz);
+                          if (!pos) continue;
+                          const aktuelleWerte = projekt.werte.get(ent.oz);
+                          if (!aktuelleWerte) continue;
+
+                          // Neuen Eintrag in die Preisdatenbank
+                          if (ent.feld === "X Stoffe" && aktuelleWerte.stoffe_ek) {
+                            const woerter = pos.kurztext.toLowerCase().replace(/[^a-zäöüß0-9\s]/gi, "").split(/\s+/).filter((w: string) => w.length > 2).slice(0, 4);
+                            pd.eintraege.push({
+                              suchbegriff: woerter.join(" "),
+                              material: pos.kurztext,
+                              preis_pro_einheit: Number(aktuelleWerte.stoffe_ek),
+                              einheit: pos.einheit ?? "",
+                              quelle: `Kalkulation ${projekt.name}, ${new Date().toISOString().slice(0, 10)}`,
+                              datum: new Date().toISOString().slice(0, 10),
+                              lieferant: projekt.kunde,
+                            });
+                          }
+                        }
+
+                        await window.baukalk.vorgabenSpeichern(
+                          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+                          { version: "1.0.0", beschreibung: "Interne Preisdatenbank", eintraege: pd.eintraege },
+                        );
+                      } catch (err) {
+                        console.error("Preisdatenbank-Update fehlgeschlagen:", err);
+                      }
+                    }
+
                     setMeldung(
-                      `Projekt abgeschlossen. ${kundeCount} Werte für Kunde übernommen, ${globalCount} global vorgeschlagen.`,
+                      `Projekt abgeschlossen. ${kundeCount} Werte für Kunde übernommen, ${globalCount} in Preisdatenbank gespeichert.`,
                     );
                   }}
                   onAbbrechen={() => setZeigeKorrekturDialog(false)}

@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "beschreibung": "Interne Preisdatenbank — wird automatisch aus abgeschlossenen Kalkulationen gefüllt",
+  "eintraege": [
+    {
+      "suchbegriff": "verbundstein 100/200/80",
+      "material": "Betonverbundsteinpflaster 100x200x80",
+      "preis_pro_einheit": 17.20,
+      "einheit": "m²",
+      "quelle": "Riegelsberg LV3, braun-steine",
+      "datum": "2026-03-19",
+      "lieferant": "braun-steine"
+    },
+    {
+      "suchbegriff": "naturschotter 0/32",
+      "material": "Naturschotter 0/32",
+      "preis_pro_einheit": 19.20,
+      "einheit": "t",
+      "quelle": "Riegelsberg LV3",
+      "datum": "2026-03-19"
+    },
+    {
+      "suchbegriff": "gartenbeetplatte 5/25",
+      "material": "Einfassungsstein Gartenbeetplatte 5/25",
+      "preis_pro_einheit": 13.00,
+      "einheit": "m",
+      "quelle": "Riegelsberg LV3",
+      "datum": "2026-03-19"
+    },
+    {
+      "suchbegriff": "oberboden",
+      "material": "Oberboden/Mutterboden",
+      "preis_pro_einheit": 18.75,
+      "einheit": "t",
+      "quelle": "Riegelsberg LV3",
+      "datum": "2026-03-19"
+    },
+    {
+      "suchbegriff": "beton c20",
+      "material": "Frischbeton C20/25 Kleinmenge",
+      "preis_pro_einheit": 200,
+      "einheit": "m³",
+      "quelle": "Leitfaden §5.1",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "beton c25",
+      "material": "Frischbeton C25/30 LKW",
+      "preis_pro_einheit": 150,
+      "einheit": "m³",
+      "quelle": "Leitfaden §5.2",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "splitt brechsand bettung",
+      "material": "Splitt/Brechsand für Pflasterbettung",
+      "preis_pro_einheit": 25,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "frostschutz 0/45",
+      "material": "Frostschutzmaterial 0/45",
+      "preis_pro_einheit": 18,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "schotter tragschicht 0/32",
+      "material": "Schotter für Tragschicht 0/32",
+      "preis_pro_einheit": 22,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "entsorgung asphalt teerhaltig",
+      "material": "Entsorgung teerhaltiger Asphalt",
+      "preis_pro_einheit": 45,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "entsorgung boden bm-0",
+      "material": "Bodenverwertung BM-0",
+      "preis_pro_einheit": 8,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    },
+    {
+      "suchbegriff": "entsorgung boden bm-f2",
+      "material": "Bodenentsorgung BM-F2 (belastet)",
+      "preis_pro_einheit": 55,
+      "einheit": "t",
+      "quelle": "Erfahrungswert",
+      "datum": "2026-04-09"
+    }
+  ]
+}
