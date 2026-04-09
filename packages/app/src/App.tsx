@@ -8,7 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
-import { autoBefuellung, wendeModifierAn, scanModifier, type ModifierKeywords } from "@baukalk/kern";
+import { autoBefuellung, wendeModifierAn, scanModifier, bildePositionsGruppen, type ModifierKeywords, type PositionsGruppe } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 import { KorrekturDialog } from "./components/KorrekturDialog.js";
@@ -34,6 +34,7 @@ export function App(): React.JSX.Element {
   const [initialWerte, setInitialWerte] = useState<Map<string, PositionRechenInput>>(new Map());
   const [kunde, setKunde] = useState("");
   const [quellenMapState, setQuellenMapState] = useState<Map<string, { quelle: string; farbe: string; beschreibung: string }>>(new Map());
+  const [positionsGruppen, setPositionsGruppen] = useState<PositionsGruppe[]>([]);
 
   // Profil-Presets
   const profile = {
@@ -117,9 +118,10 @@ export function App(): React.JSX.Element {
         geraetezulage_default: new Decimal(parameterForm.geraetezulage_default),
       };
 
-      // Initial-Werte und Quellen merken
+      // Initial-Werte, Quellen und Gruppen merken
       setInitialWerte(new Map(werte));
       setQuellenMapState(quellenMap);
+      setPositionsGruppen(bildePositionsGruppen(lv.eintraege));
 
       setProjekt({
         name: lv.meta.original_datei,
@@ -144,15 +146,29 @@ export function App(): React.JSX.Element {
       setProjekt((prev) => {
         if (!prev) return prev;
         const neueWerte = new Map(prev.werte);
+        const decimalWert = wert !== undefined ? new Decimal(wert) : undefined;
+
+        // Wert für die geänderte Position setzen
         const existing = neueWerte.get(oz) ?? {};
-        neueWerte.set(oz, {
-          ...existing,
-          [feld]: wert !== undefined ? new Decimal(wert) : undefined,
-        });
+        neueWerte.set(oz, { ...existing, [feld]: decimalWert });
+
+        // Positions-Gruppen-Sperre: Auf alle Gruppenmitglieder propagieren
+        for (const gruppe of positionsGruppen) {
+          if (gruppe.mitglieder_oz.includes(oz)) {
+            // Diese Position ist in einer Gruppe — Wert auf alle Mitglieder übertragen
+            for (const mitgliedOz of gruppe.mitglieder_oz) {
+              if (mitgliedOz === oz) continue; // sich selbst überspringen
+              const mitgliedExisting = neueWerte.get(mitgliedOz) ?? {};
+              neueWerte.set(mitgliedOz, { ...mitgliedExisting, [feld]: decimalWert });
+            }
+            break;
+          }
+        }
+
         return { ...prev, werte: neueWerte };
       });
     },
-    [],
+    [positionsGruppen],
   );
 
   // ─── Excel Export ───
