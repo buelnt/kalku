@@ -1,3 +1,4 @@
+import { PROJEKTE_PFAD } from "../pfade.js";
 /**
  * Projekt-Speicher/Lade-Dialoge
  *
@@ -63,7 +64,7 @@ export function ProjektSpeichern(props: ProjektSpeichernProps): React.JSX.Elemen
       gespeichert_am: new Date().toISOString(),
     };
 
-    const pfad = `${process.cwd()}/projekte/${projektName.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
+    const pfad = `${PROJEKTE_PFAD}/${projektName.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
     try {
       await window.baukalk.projektSpeichern(pfad, daten);
       onMeldung(`Projekt gespeichert: ${pfad}`);
@@ -78,7 +79,7 @@ export function ProjektSpeichern(props: ProjektSpeichernProps): React.JSX.Elemen
     const name = prompt("Projektname zum Laden:");
     if (!name) return;
 
-    const pfad = `${process.cwd()}/projekte/${name.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
+    const pfad = `${PROJEKTE_PFAD}/${name.replace(/[^a-zA-Z0-9_-]/g, "_")}.json`;
     try {
       const raw = await window.baukalk.projektLaden(pfad);
       if (!raw) {

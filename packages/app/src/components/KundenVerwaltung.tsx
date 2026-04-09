@@ -1,3 +1,4 @@
+import { VORGABEN_PFAD } from "../pfade.js";
 /**
  * Kunden-Verwaltung
  *
@@ -31,7 +32,7 @@ interface KundenVerwaltungProps {
   aktuellerKunde?: string;
 }
 
-const KUNDEN_PFAD = `${typeof process !== "undefined" && process.cwd ? process.cwd() : "."}/vorgaben/kunden.json`;
+const KUNDEN_PFAD = `${VORGABEN_PFAD}/kunden.json`;
 
 export function KundenVerwaltung(props: KundenVerwaltungProps): React.JSX.Element {
   const [daten, setDaten] = useState<KundenDaten | null>(null);

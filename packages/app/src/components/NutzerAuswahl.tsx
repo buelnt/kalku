@@ -1,3 +1,4 @@
+import { VORGABEN_PFAD } from "../pfade.js";
 /**
  * Nutzer-Auswahl beim App-Start
  *
@@ -18,7 +19,7 @@ interface NutzerAuswahlProps {
   onGewaehlt: (nutzer: Nutzer) => void;
 }
 
-const NUTZER_PFAD = `${typeof process !== "undefined" && process.cwd ? process.cwd() : "."}/vorgaben/nutzer.json`;
+const NUTZER_PFAD = `${VORGABEN_PFAD}/nutzer.json`;
 
 export function NutzerAuswahl(props: NutzerAuswahlProps): React.JSX.Element {
   const [nutzer, setNutzer] = useState<Nutzer[]>([]);

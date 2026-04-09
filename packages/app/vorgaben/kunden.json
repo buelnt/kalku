@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "kunden": [
+    {
+      "id": "1695_gesellchen_gmbh",
+      "name": "1695_Gesellchen_GmbH",
+      "ordner": "/Users/admin/Library/CloudStorage/OneDrive-kalku/KT01/1695_Gesellchen_GmbH/260410_Grundschule_Pfaffenwoog",
+      "angebote_unterordner": "04_Angebote",
+      "overrides": {},
+      "erstellt_am": "2026-04-09",
+      "notizen": ""
+    }
+  ]
+}

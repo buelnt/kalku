@@ -1,3 +1,4 @@
+import { VORGABEN_PFAD } from "./pfade.js";
 /**
  * BauKalk Pro — Haupt-App-Komponente
  *
@@ -65,7 +66,7 @@ export function App(): React.JSX.Element {
       if (kunde) {
         try {
           const kundenRaw = await window.baukalk.vorgabenLaden(
-            `${process.cwd()}/vorgaben/kunden.json`,
+            `${VORGABEN_PFAD}/kunden.json`,
           );
           if (kundenRaw) {
             const kunden = (kundenRaw as { kunden: Array<{ name: string; ordner: string; angebote_unterordner: string }> }).kunden;
@@ -102,7 +103,7 @@ export function App(): React.JSX.Element {
       let preisdatenbank: PreisdatenbankEintrag[] = [...angebotePreise];
       try {
         const pdRaw = await window.baukalk.vorgabenLaden(
-          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+          `${VORGABEN_PFAD}/preisdatenbank.json`,
         );
         if (pdRaw && typeof pdRaw === "object" && "eintraege" in (pdRaw as Record<string, unknown>)) {
           preisdatenbank = (pdRaw as { eintraege: typeof preisdatenbank }).eintraege;
@@ -131,7 +132,7 @@ export function App(): React.JSX.Element {
       // Modifier-Keywords anwenden (NU-Trigger, Vorhalte etc.)
       try {
         const kwRaw = await window.baukalk.vorgabenLaden(
-          `${process.cwd()}/vorgaben/modifier-keywords.json`,
+          `${VORGABEN_PFAD}/modifier-keywords.json`,
         );
         if (kwRaw) {
           const keywords = kwRaw as ModifierKeywords;
@@ -466,7 +467,7 @@ export function App(): React.JSX.Element {
                     if (globalCount > 0) {
                       try {
                         const pdRaw = await window.baukalk.vorgabenLaden(
-                          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+                          `${VORGABEN_PFAD}/preisdatenbank.json`,
                         );
                         const pd = (pdRaw as { eintraege: Array<Record<string, unknown>> } | null) ?? { eintraege: [] };
 
@@ -494,7 +495,7 @@ export function App(): React.JSX.Element {
                         }
 
                         await window.baukalk.vorgabenSpeichern(
-                          `${process.cwd()}/vorgaben/preisdatenbank.json`,
+                          `${VORGABEN_PFAD}/preisdatenbank.json`,
                           { version: "1.0.0", beschreibung: "Interne Preisdatenbank", eintraege: pd.eintraege },
                         );
                       } catch (err) {
@@ -625,13 +626,13 @@ function VorgabenSeite(props: { nutzer: Nutzer | null }): React.JSX.Element {
       </div>
 
       {tab === "zeitwerte" && (
-        <VorgabenEditor vorgabenPfad={`${process.cwd()}/vorgaben/gewerke/rohbau.json`} />
+        <VorgabenEditor vorgabenPfad={`${VORGABEN_PFAD}/gewerke/rohbau.json`} />
       )}
 
       {tab === "plausi" && (
         <JsonEditor
           titel="Plausi-Regeln"
-          pfad={`${process.cwd()}/vorgaben/plausi-regeln.json`}
+          pfad={`${VORGABEN_PFAD}/plausi-regeln.json`}
           beschreibung="Deklarative Regeln die nach jeder Position geprüft werden (FAIL/WARN)."
         />
       )}
@@ -639,7 +640,7 @@ function VorgabenSeite(props: { nutzer: Nutzer | null }): React.JSX.Element {
       {tab === "modifier" && (
         <JsonEditor
           titel="Modifier-Keywords"
-          pfad={`${process.cwd()}/vorgaben/modifier-keywords.json`}
+          pfad={`${VORGABEN_PFAD}/modifier-keywords.json`}
           beschreibung="NU-Trigger, Erschwernis-Trigger, Vorhalte-Trigger, Reine-Arbeitsleistung-Keywords."
         />
       )}
@@ -647,7 +648,7 @@ function VorgabenSeite(props: { nutzer: Nutzer | null }): React.JSX.Element {
       {tab === "profile" && (
         <JsonEditor
           titel="Kalkulationsprofile"
-          pfad={`${process.cwd()}/vorgaben/profile.json`}
+          pfad={`${VORGABEN_PFAD}/profile.json`}
           beschreibung="Scharf / Normal / Großzügig mit allen Parametersätzen."
         />
       )}

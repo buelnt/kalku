@@ -1,3 +1,4 @@
+import { VORGABEN_PFAD } from "../pfade.js";
 /**
  * Approval-Queue — Senior genehmigt/lehnt Junior-Vorschläge ab
  *
@@ -29,7 +30,7 @@ interface ApprovalQueueProps {
   nutzerName: string;
 }
 
-const QUEUE_PFAD = `${typeof process !== "undefined" && process.cwd ? process.cwd() : "."}/vorgaben/approval-queue.json`;
+const QUEUE_PFAD = `${VORGABEN_PFAD}/approval-queue.json`;
 
 export function ApprovalQueue(props: ApprovalQueueProps): React.JSX.Element {
   const [vorschlaege, setVorschlaege] = useState<Vorschlag[]>([]);
