@@ -8,6 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
+import { VorgabenEditor } from "./components/VorgabenEditor.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -290,21 +291,50 @@ function ProjekteSeite(props: {
 
 // ─── Vorgaben-Seite ───
 function VorgabenSeite(): React.JSX.Element {
+  const [tab, setTab] = useState<"zeitwerte" | "uebersicht">("zeitwerte");
+
   return (
     <div>
       <h1 style={{ fontSize: 24, marginBottom: 16 }}>Vorgaben (Admin-Panel)</h1>
-      <p style={{ color: "#64748b", marginBottom: 24 }}>
-        Editierbare Defaults für alle Gewerke, Profile, Modifier-Keywords und Plausi-Regeln.
-      </p>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <VorgabenKarte titel="Gewerk-Defaults" beschreibung="54 Zeitwerte für Rohbau/GaLaBau/Tiefbau" />
-        <VorgabenKarte titel="Kalkulationsprofile" beschreibung="Scharf / Normal / Großzügig" />
-        <VorgabenKarte titel="Modifier-Keywords" beschreibung="NU-Trigger, Erschwernis, Vorhalte, Arbeitsleistung" />
-        <VorgabenKarte titel="Plausi-Regeln" beschreibung="10 deklarative Regeln (R001-R010)" />
-        <VorgabenKarte titel="Konstanten" beschreibung="Schüttdichten, Beton-Preise, Umrechnungsfaktoren" />
-        <VorgabenKarte titel="Preisquellen" beschreibung="Waterfall: Angebote → Stammdaten → Erfahrung → Web" />
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        <TabBtn label="Zeitwerte editieren" aktiv={tab === "zeitwerte"} onClick={() => setTab("zeitwerte")} />
+        <TabBtn label="Übersicht" aktiv={tab === "uebersicht"} onClick={() => setTab("uebersicht")} />
       </div>
+
+      {tab === "zeitwerte" && (
+        <VorgabenEditor vorgabenPfad={`${process.cwd()}/vorgaben/gewerke/rohbau.json`} />
+      )}
+
+      {tab === "uebersicht" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <VorgabenKarte titel="Gewerk-Defaults" beschreibung="54 Zeitwerte für Rohbau/GaLaBau/Tiefbau" />
+          <VorgabenKarte titel="Kalkulationsprofile" beschreibung="Scharf / Normal / Großzügig" />
+          <VorgabenKarte titel="Modifier-Keywords" beschreibung="NU-Trigger, Erschwernis, Vorhalte, Arbeitsleistung" />
+          <VorgabenKarte titel="Plausi-Regeln" beschreibung="10 deklarative Regeln (R001-R010)" />
+          <VorgabenKarte titel="Konstanten" beschreibung="Schüttdichten, Beton-Preise, Umrechnungsfaktoren" />
+          <VorgabenKarte titel="Preisquellen" beschreibung="Waterfall: Angebote → Stammdaten → Erfahrung → Web" />
+        </div>
+      )}
     </div>
+  );
+}
+
+function TabBtn(p: { label: string; aktiv: boolean; onClick: () => void }): React.JSX.Element {
+  return (
+    <button
+      onClick={p.onClick}
+      style={{
+        padding: "6px 16px", border: "1px solid #e2e8f0",
+        borderRadius: 6, fontSize: 13, cursor: "pointer",
+        background: p.aktiv ? "#2563eb" : "#fff",
+        color: p.aktiv ? "#fff" : "#475569",
+        fontFamily: "inherit",
+      }}
+    >
+      {p.label}
+    </button>
   );
 }
 
