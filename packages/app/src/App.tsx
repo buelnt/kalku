@@ -215,6 +215,24 @@ export function App(): React.JSX.Element {
   // ─── Excel Export ───
   const handleExport = useCallback(async () => {
     if (!projekt) return;
+
+    // Plausi-Check: FAIL-Positionen blockieren Export
+    let failCount = 0;
+    for (const e of projekt.lv.eintraege) {
+      if (e.art === "BEREICH") continue;
+      const input = projekt.werte.get(e.oz) ?? {};
+      const stoffe = input.stoffe_ek != null ? Number(input.stoffe_ek) : 0;
+      const zeit = input.zeit_min_roh != null ? Number(input.zeit_min_roh) : 0;
+      const nu = input.nu_ek != null ? Number(input.nu_ek) : 0;
+      if (stoffe === 0 && zeit === 0 && nu === 0) failCount++;
+    }
+    if (failCount > 0) {
+      setMeldung(
+        `Export blockiert: ${failCount} Positionen haben keine Werte (EP = 0,00 €). Bitte alle Positionen kalkulieren.`,
+      );
+      return;
+    }
+
     try {
       setMeldung("Exportiere Excel...");
 
