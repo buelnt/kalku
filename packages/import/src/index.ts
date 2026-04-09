@@ -7,4 +7,5 @@
 
 export { parseExcelLv } from "./excel-lv-parser.js";
 export { parseGaebD83 } from "./gaeb-d83-parser.js";
+export { parseGaebXml } from "./gaeb-xml-parser.js";
 export { decodeCp850 } from "./cp850.js";

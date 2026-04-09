@@ -7,7 +7,7 @@
 import { ipcMain, dialog, BrowserWindow } from "electron";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { extname, join } from "node:path";
-import { parseExcelLv, parseGaebD83 } from "@baukalk/import";
+import { parseExcelLv, parseGaebD83, parseGaebXml } from "@baukalk/import";
 import { exportExcelLv3 } from "@baukalk/export";
 import type { ExportOptionen } from "@baukalk/export";
 import { Decimal } from "@baukalk/datenmodell";
@@ -42,11 +42,13 @@ export function registerIpcHandlers(): void {
 
     if (ext === ".xlsx" || ext === ".xls") {
       lv = parseExcelLv(pfad);
-    } else if (ext === ".d83" || ext === ".d84") {
+    } else if (ext === ".d83" || ext === ".d84" || ext === ".d81" || ext === ".d86") {
       lv = parseGaebD83(pfad);
+    } else if (ext === ".x83" || ext === ".x84" || ext === ".x86" || ext === ".x81") {
+      lv = parseGaebXml(pfad);
     } else {
       throw new Error(
-        `Dateiformat "${ext}" wird noch nicht unterstützt. Unterstützt: .xlsx, .d83, .d84`,
+        `Dateiformat "${ext}" wird noch nicht unterstützt. Unterstützt: .xlsx, .d83, .d84, .x83, .x84, .x86`,
       );
     }
 
