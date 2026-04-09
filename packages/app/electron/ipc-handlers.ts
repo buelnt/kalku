@@ -8,6 +8,7 @@ import { ipcMain, dialog, BrowserWindow } from "electron";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { extname, join } from "node:path";
 import { parseExcelLv, parseGaebD83, parseGaebXml } from "@baukalk/import";
+import { exportGaebD84 } from "@baukalk/export";
 import { exportExcelLv3 } from "@baukalk/export";
 import type { ExportOptionen } from "@baukalk/export";
 import { Decimal } from "@baukalk/datenmodell";
@@ -107,6 +108,55 @@ export function registerIpcHandlers(): void {
       });
 
       await wb.xlsx.writeFile(result.filePath);
+      return result.filePath;
+    },
+  );
+
+  // ─── GAEB Exportieren ───
+  ipcMain.handle(
+    "lv:gaebExportieren",
+    async (_event, optionen: { lv: LvImport; parameter: Record<string, number>; werte_raw: Record<string, Record<string, number | null>>; mitPreisen: boolean; projektName?: string; bieter?: string }) => {
+      const win = BrowserWindow.getFocusedWindow();
+      if (!win) return null;
+
+      const ext = optionen.mitPreisen ? "d84" : "d81";
+      const result = await dialog.showSaveDialog(win, {
+        title: `Kalkulation als GAEB ${ext.toUpperCase()} exportieren`,
+        defaultPath: `Kalkulation_${new Date().toISOString().slice(0, 10)}.${ext}`,
+        filters: [{ name: `GAEB ${ext.toUpperCase()}`, extensions: [ext] }],
+      });
+
+      if (result.canceled || !result.filePath) return null;
+
+      const werte = new Map<string, PositionRechenInput>();
+      for (const [oz, raw] of Object.entries(optionen.werte_raw)) {
+        werte.set(oz, {
+          stoffe_ek: raw.stoffe_ek != null ? new Decimal(raw.stoffe_ek) : undefined,
+          zeit_min_roh: raw.zeit_min_roh != null ? new Decimal(raw.zeit_min_roh) : undefined,
+          geraetezulage_eur_h: raw.geraetezulage_eur_h != null ? new Decimal(raw.geraetezulage_eur_h) : undefined,
+          nu_ek: raw.nu_ek != null ? new Decimal(raw.nu_ek) : undefined,
+        });
+      }
+
+      const p = optionen.parameter;
+      const parameter = {
+        verrechnungslohn: new Decimal(p.verrechnungslohn ?? 90),
+        material_zuschlag: new Decimal(p.material_zuschlag ?? 0.3),
+        nu_zuschlag: new Decimal(p.nu_zuschlag ?? 0.3),
+        zeitwert_faktor: new Decimal(p.zeitwert_faktor ?? 0),
+        geraetezulage_default: new Decimal(p.geraetezulage_default ?? 0.5),
+      };
+
+      const gaebStr = exportGaebD84({
+        lv: optionen.lv,
+        parameter,
+        werte,
+        mitPreisen: optionen.mitPreisen,
+        projektName: optionen.projektName,
+        bieter: optionen.bieter,
+      });
+
+      writeFileSync(result.filePath, gaebStr, "latin1");
       return result.filePath;
     },
   );

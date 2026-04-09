@@ -11,6 +11,7 @@ import { LvEditor } from "./components/LvEditor.js";
 import { autoBefuellung } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
+import { KorrekturDialog } from "./components/KorrekturDialog.js";
 
 type Seite = "projekte" | "kalkulation" | "vorgaben";
 
@@ -28,6 +29,9 @@ export function App(): React.JSX.Element {
   const [seite, setSeite] = useState<Seite>("projekte");
   const [projekt, setProjekt] = useState<ProjektState | null>(null);
   const [meldung, setMeldung] = useState<string | null>(null);
+  const [zeigeKorrekturDialog, setZeigeKorrekturDialog] = useState(false);
+  const [initialWerte, setInitialWerte] = useState<Map<string, PositionRechenInput>>(new Map());
+  const [kunde, setKunde] = useState("");
 
   // Profil-Presets
   const profile = {
@@ -69,9 +73,12 @@ export function App(): React.JSX.Element {
         geraetezulage_default: new Decimal(parameterForm.geraetezulage_default),
       };
 
+      // Initial-Werte merken für den Korrektur-Dialog
+      setInitialWerte(new Map(werte));
+
       setProjekt({
         name: lv.meta.original_datei,
-        kunde: "",
+        kunde: kunde,
         lv,
         werte,
         parameter,
@@ -113,21 +120,21 @@ export function App(): React.JSX.Element {
       const werteRaw: Record<string, Record<string, number | null>> = {};
       for (const [oz, input] of projekt.werte) {
         werteRaw[oz] = {
-          stoffe_ek: input.stoffe_ek?.toNumber() ?? null,
-          zeit_min_roh: input.zeit_min_roh?.toNumber() ?? null,
-          geraetezulage_eur_h: input.geraetezulage_eur_h?.toNumber() ?? null,
-          nu_ek: input.nu_ek?.toNumber() ?? null,
+          stoffe_ek: input.stoffe_ek != null ? Number(input.stoffe_ek) : null,
+          zeit_min_roh: input.zeit_min_roh != null ? Number(input.zeit_min_roh) : null,
+          geraetezulage_eur_h: input.geraetezulage_eur_h != null ? Number(input.geraetezulage_eur_h) : null,
+          nu_ek: input.nu_ek != null ? Number(input.nu_ek) : null,
         };
       }
 
       const pfad = await window.baukalk.lvExportieren({
         lv: projekt.lv,
         parameter: {
-          verrechnungslohn: projekt.parameter.verrechnungslohn.toNumber(),
-          material_zuschlag: projekt.parameter.material_zuschlag.toNumber(),
-          nu_zuschlag: projekt.parameter.nu_zuschlag.toNumber(),
-          zeitwert_faktor: projekt.parameter.zeitwert_faktor.toNumber(),
-          geraetezulage_default: projekt.parameter.geraetezulage_default.toNumber(),
+          verrechnungslohn: Number(projekt.parameter.verrechnungslohn),
+          material_zuschlag: Number(projekt.parameter.material_zuschlag),
+          nu_zuschlag: Number(projekt.parameter.nu_zuschlag),
+          zeitwert_faktor: Number(projekt.parameter.zeitwert_faktor),
+          geraetezulage_default: Number(projekt.parameter.geraetezulage_default),
         },
         werte_raw: werteRaw,
         meta: {
@@ -148,6 +155,43 @@ export function App(): React.JSX.Element {
       }
     } catch (err) {
       setMeldung(`Export-Fehler: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }, [projekt]);
+
+  // ─── GAEB Export ───
+  const handleGaebExport = useCallback(async (mitPreisen: boolean) => {
+    if (!projekt) return;
+    try {
+      setMeldung(`Exportiere GAEB ${mitPreisen ? "D84" : "D81"}...`);
+      const werteRaw: Record<string, Record<string, number | null>> = {};
+      for (const [oz, input] of projekt.werte) {
+        werteRaw[oz] = {
+          stoffe_ek: input.stoffe_ek != null ? Number(input.stoffe_ek) : null,
+          zeit_min_roh: input.zeit_min_roh != null ? Number(input.zeit_min_roh) : null,
+          geraetezulage_eur_h: input.geraetezulage_eur_h != null ? Number(input.geraetezulage_eur_h) : null,
+          nu_ek: input.nu_ek != null ? Number(input.nu_ek) : null,
+        };
+      }
+      const pfad = await window.baukalk.lvGaebExportieren({
+        lv: projekt.lv,
+        parameter: {
+          verrechnungslohn: Number(projekt.parameter.verrechnungslohn),
+          material_zuschlag: Number(projekt.parameter.material_zuschlag),
+          nu_zuschlag: Number(projekt.parameter.nu_zuschlag),
+          zeitwert_faktor: Number(projekt.parameter.zeitwert_faktor),
+          geraetezulage_default: Number(projekt.parameter.geraetezulage_default),
+        },
+        werte_raw: werteRaw,
+        mitPreisen,
+        projektName: projekt.name,
+        bieter: projekt.kunde || "kalku.de",
+      });
+      if (pfad) {
+        setMeldung(`GAEB exportiert: ${pfad}`);
+        setTimeout(() => setMeldung(null), 5000);
+      } else { setMeldung(null); }
+    } catch (err) {
+      setMeldung(`GAEB-Export-Fehler: ${err instanceof Error ? err.message : String(err)}`);
     }
   }, [projekt]);
 
@@ -214,6 +258,8 @@ export function App(): React.JSX.Element {
               setAktivProfil(p);
               setParameterForm(profile[p]);
             }}
+            kunde={kunde}
+            onKundeAendern={setKunde}
           />
         )}
         {seite === "kalkulation" && projekt && (
@@ -235,7 +281,19 @@ export function App(): React.JSX.Element {
                   onMeldung={setMeldung}
                 />
                 <button onClick={handleExport} style={exportBtnStyle}>
-                  Als Excel exportieren
+                  Excel
+                </button>
+                <button onClick={() => handleGaebExport(true)} style={{ ...exportBtnStyle, background: "#0891b2" }}>
+                  GAEB D84
+                </button>
+                <button onClick={() => handleGaebExport(false)} style={{ ...exportBtnStyle, background: "#6366f1" }}>
+                  GAEB D81
+                </button>
+                <button
+                  onClick={() => setZeigeKorrekturDialog(true)}
+                  style={{ ...exportBtnStyle, background: "#7c3aed" }}
+                >
+                  Abschließen
                 </button>
               </div>
             </div>
@@ -245,6 +303,45 @@ export function App(): React.JSX.Element {
               werte={projekt.werte}
               onWertAendern={handleWertAendern}
             />
+            {/* Korrektur-Dialog */}
+            {zeigeKorrekturDialog && (() => {
+              // Abweichungen berechnen
+              const abweichungen: Array<{
+                oz: string; kurztext: string; feld: string;
+                alterWert: number | undefined; neuerWert: number | undefined;
+              }> = [];
+              for (const e of projekt.lv.eintraege) {
+                if (e.art === "BEREICH") continue;
+                const init = initialWerte.get(e.oz) ?? {};
+                const aktuell = projekt.werte.get(e.oz) ?? {};
+                const felder = ["stoffe_ek", "zeit_min_roh", "geraetezulage_eur_h", "nu_ek"] as const;
+                for (const feld of felder) {
+                  const alt = init[feld] != null ? Number(init[feld]) : undefined;
+                  const neu = aktuell[feld] != null ? Number(aktuell[feld]) : undefined;
+                  if (alt !== neu && (alt !== undefined || neu !== undefined)) {
+                    const feldLabel = feld === "stoffe_ek" ? "X Stoffe" : feld === "zeit_min_roh" ? "Y Zeit" : feld === "geraetezulage_eur_h" ? "Z Geräte" : "M NU";
+                    abweichungen.push({
+                      oz: e.oz, kurztext: e.kurztext, feld: feldLabel,
+                      alterWert: alt, neuerWert: neu,
+                    });
+                  }
+                }
+              }
+              return (
+                <KorrekturDialog
+                  abweichungen={abweichungen}
+                  onAbschliessen={(entscheidungen) => {
+                    setZeigeKorrekturDialog(false);
+                    const kundeCount = entscheidungen.filter((e) => e.fuerKunde).length;
+                    const globalCount = entscheidungen.filter((e) => e.fuerGlobal).length;
+                    setMeldung(
+                      `Projekt abgeschlossen. ${kundeCount} Werte für Kunde übernommen, ${globalCount} global vorgeschlagen.`,
+                    );
+                  }}
+                  onAbbrechen={() => setZeigeKorrekturDialog(false)}
+                />
+              );
+            })()}
           </div>
         )}
         {seite === "kalkulation" && !projekt && (
@@ -268,12 +365,26 @@ function ProjekteSeite(props: {
   onParameterAendern: (feld: ParamFeld, wert: number) => void;
   aktivProfil: "scharf" | "normal" | "grosszuegig";
   onProfilWaehlen: (p: "scharf" | "normal" | "grosszuegig") => void;
+  kunde: string;
+  onKundeAendern: (v: string) => void;
 }): React.JSX.Element {
-  const { parameterForm, onParameterAendern, aktivProfil, onProfilWaehlen } = props;
+  const { parameterForm, onParameterAendern, aktivProfil, onProfilWaehlen, kunde, onKundeAendern } = props;
 
   return (
     <div>
       <h1 style={{ fontSize: 24, marginBottom: 24 }}>Neues Projekt</h1>
+
+      {/* Kunde */}
+      <div style={{ ...cardStyle, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, marginBottom: 12 }}>Kunde</h2>
+        <input
+          type="text"
+          placeholder="Kundenname eingeben (z.B. Gesellchen GmbH)"
+          value={kunde}
+          onChange={(e) => onKundeAendern(e.target.value)}
+          style={inputStyle}
+        />
+      </div>
 
       {/* Profil-Auswahl */}
       <div style={{ ...cardStyle, marginBottom: 16 }}>
