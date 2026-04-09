@@ -7,5 +7,6 @@
 
 export * from "./rechnen.js";
 export * from "./modifier-scan.js";
+export * from "./modifier-anwenden.js";
 export * from "./positions-gruppen.js";
 export * from "./plausi.js";
