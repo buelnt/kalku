@@ -52,6 +52,18 @@ export function NutzerAuswahl(props: NutzerAuswahlProps): React.JSX.Element {
           Wer kalkuliert heute?
         </p>
         <div style={{ display: "grid", gap: 8 }}>
+          {nutzer.length === 0 && (
+            <button
+              onClick={() => props.onGewaehlt({ id: "default", name: "Kalkulator", email: "", rolle: "senior" })}
+              style={{
+                padding: "14px 20px", border: "1px solid #e2e8f0", borderRadius: 8,
+                background: "#2563eb", color: "#fff", cursor: "pointer", textAlign: "center",
+                fontFamily: "inherit", fontSize: 15, fontWeight: 600,
+              }}
+            >
+              Als Senior-Kalkulator starten
+            </button>
+          )}
           {nutzer.map((n) => (
             <button
               key={n.id}
