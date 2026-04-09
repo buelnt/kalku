@@ -7,6 +7,7 @@
 import { app, BrowserWindow, Menu } from "electron";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { registerIpcHandlers } from "./ipc-handlers.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -78,6 +79,7 @@ const template: Electron.MenuItemConstructorOptions[] = [
 ];
 
 app.whenReady().then(() => {
+  registerIpcHandlers();
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
   createWindow();
 
