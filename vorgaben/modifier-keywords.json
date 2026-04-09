@@ -1,0 +1,51 @@
+{
+  "version": "1.0.0",
+  "nu_trigger": {
+    "beschreibung": "Bei diesen Stichworten: M>0, Y=0, X=leer (Nachunternehmer-Komplett)",
+    "keywords": [
+      "fallschutz",
+      "markierung",
+      "tüv",
+      "sachverständig",
+      "din 1176",
+      "spielplatz-prüfung",
+      "spielplatzprüfung"
+    ],
+    "referenz": "Leitfaden §0.7"
+  },
+  "erschwernis_trigger": {
+    "beschreibung": "Bei diesen Stichworten: Zeit/Preis nach oben anpassen",
+    "keywords": [
+      { "keyword": "leibung", "aktion": "+1 min/lfm", "referenz": "Interview §10b" },
+      { "keyword": "laibung", "aktion": "+1 min/lfm", "referenz": "Interview §10b" },
+      { "keyword": "anpassen", "aktion": "Schneidearbeit, Z=15", "referenz": "Leitfaden §4.3" },
+      { "keyword": "wechselfeucht", "aktion": "Verdichtung erhöht", "referenz": "Leitfaden §0.8" },
+      { "keyword": "sonderform", "aktion": "Zeitwert +20%", "referenz": "Leitfaden §0.8" },
+      { "keyword": "spezialprofil", "aktion": "Zeitwert +20%", "referenz": "Leitfaden §0.8" },
+      { "keyword": "verkehrslast", "aktion": "Verstärkter Unterbau", "referenz": "Leitfaden §0.8" },
+      { "keyword": "befahrbar", "aktion": "Verstärkter Unterbau", "referenz": "Leitfaden §0.8" },
+      { "keyword": "inkl. fundament und rückenstütze", "aktion": "0,10 m³/lfm Beton + 7 min Aushub", "referenz": "Leitfaden §4.2" },
+      { "keyword": "inkl. fundament", "aktion": "0,05 m³/lfm Beton", "referenz": "Leitfaden §4.2" }
+    ]
+  },
+  "vorhalte_trigger": {
+    "beschreibung": "Bei Vorhalte-Positionen: X=leer, Y=0, AA als Override",
+    "einheiten": ["StWo", "mWo", "StMt", "StTag"],
+    "keywords": ["vorhalten"],
+    "referenz": "Leitfaden §0.9"
+  },
+  "reine_arbeitsleistung": {
+    "beschreibung": "Bei diesen Texten: X=0 (keine Stoffe, reine Arbeit)",
+    "keywords": [
+      "bauzaun aufstellen", "bauzaun umsetzen",
+      "schutzzaun aufstellen", "schutzzaun umsetzen",
+      "ausbau zum wiedereinbau", "wiedereinbau vorhandener",
+      "mähen", "fräsen",
+      "boden lösen", "boden laden", "boden fördern",
+      "planum herstellen", "profilieren", "nachverdichten",
+      "abbrucharbeiten", "auflockern", "planieren",
+      "geräte umsetzen"
+    ],
+    "referenz": "Gemini v8 Regel 1"
+  }
+}

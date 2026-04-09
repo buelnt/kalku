@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "regeln": [
+    {
+      "id": "R001",
+      "name": "Boden einbauen/verdichten ≥ 8 min/m³",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["einbauen", "verdichten", "lagenweise"],
+        "einheit_ist": ["m³", "m3"],
+        "zeit_min_kleiner_als": 8
+      },
+      "aktion": "FAIL",
+      "nachricht": "Boden einbauen+verdichten braucht mindestens 8 min/m³. Aktuell: {wert} min.",
+      "referenz": "Gemini v8 Regel 4"
+    },
+    {
+      "id": "R002",
+      "name": "Pflaster verlegen ≥ 25 min/m²",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["pflaster", "verbundstein"],
+        "langtext_enthaelt_nicht": ["aufnehmen", "abbruch", "abbrechen", "zuarbeiten", "schneiden"],
+        "einheit_ist": ["m²", "m2"],
+        "zeit_min_kleiner_als": 25
+      },
+      "aktion": "FAIL",
+      "nachricht": "Pflaster verlegen braucht mindestens 25 min/m². Aktuell: {wert} min.",
+      "referenz": "Leitfaden §4.2"
+    },
+    {
+      "id": "R003",
+      "name": "Bordstein setzen ≥ 8 min/lfm",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["bordstein", "einfassungsstein", "bord"],
+        "langtext_enthaelt": ["setzen"],
+        "einheit_ist": ["m", "lfm"],
+        "zeit_min_kleiner_als": 8
+      },
+      "aktion": "FAIL",
+      "nachricht": "Bordstein setzen braucht mindestens 8 min/lfm. Aktuell: {wert} min.",
+      "referenz": "Gemini v8 Regel 4"
+    },
+    {
+      "id": "R004",
+      "name": "Abbruch Pflaster 3-5 min/m² < NEU verlegen",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["aufnehmen", "abbruch", "abbrechen"],
+        "langtext_enthaelt_eines_2": ["pflaster", "verbundstein"],
+        "einheit_ist": ["m²", "m2"],
+        "zeit_min_groesser_als": 10
+      },
+      "aktion": "WARN",
+      "nachricht": "Abbruch Pflaster dauert typischerweise 3-5 min/m². {wert} min scheint hoch — gewollt (Erschwernis)?",
+      "referenz": "Gemini v8 Regel 4"
+    },
+    {
+      "id": "R005",
+      "name": "Asphalt ist Belag, nicht Erdmasse",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt": ["asphalt"],
+        "einheit_ist": ["m³", "m3"]
+      },
+      "aktion": "WARN",
+      "nachricht": "Asphalt wird in m² abgerechnet, nicht in m³ Erdmasse. Bitte Einheit prüfen.",
+      "referenz": "Leitfaden §5.4"
+    },
+    {
+      "id": "R006",
+      "name": "Schneidearbeit muss Z=15 haben",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["schneiden", "anpassen", "nassschneid"],
+        "geraetezulage_nicht": 15
+      },
+      "aktion": "WARN",
+      "nachricht": "Bei Schneidarbeiten sollte die Gerätezulage 15 €/h betragen (Nassschneider). Aktuell: {geraetezulage} €/h.",
+      "referenz": "Leitfaden §4.3-4.5"
+    },
+    {
+      "id": "R007",
+      "name": "NU-Position: Y muss 0 sein wenn M>0",
+      "gewerk": "*",
+      "bedingung": {
+        "nu_ek_groesser_als": 0,
+        "zeit_min_groesser_als": 0
+      },
+      "aktion": "WARN",
+      "nachricht": "NU-Position hat sowohl Nachunternehmer-Preis (M={nu_ek}) als auch Eigenzeit (Y={zeit_min}). Bei Komplett-NU sollte Y=0 sein.",
+      "referenz": "Leitfaden §0.7"
+    },
+    {
+      "id": "R008",
+      "name": "Position ohne EP-Bestandteile",
+      "gewerk": "*",
+      "bedingung": {
+        "alle_null": ["stoffe_ek", "zeit_min_roh", "nu_ek"]
+      },
+      "aktion": "FAIL",
+      "nachricht": "Position hat weder Stoffe, noch Zeit, noch NU — EP wäre 0,00 €. Vergessen zu kalkulieren?",
+      "referenz": "Intern"
+    },
+    {
+      "id": "R009",
+      "name": "Rasenansaat ≥ 2 min/m²",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["rasen", "ansaat", "rasenansaat"],
+        "einheit_ist": ["m²", "m2"],
+        "zeit_min_kleiner_als": 2
+      },
+      "aktion": "WARN",
+      "nachricht": "Rasenansaat braucht mindestens 2 min/m² (Saatbett + Ansäen). Aktuell: {wert} min.",
+      "referenz": "Gemini v8"
+    },
+    {
+      "id": "R010",
+      "name": "Baumpflanzung ≥ 30 min/St",
+      "gewerk": "rohbau",
+      "bedingung": {
+        "langtext_enthaelt_eines": ["baum pflanzen", "hochstamm"],
+        "einheit_ist": ["St", "Stck"],
+        "zeit_min_kleiner_als": 30
+      },
+      "aktion": "WARN",
+      "nachricht": "Baumpflanzung braucht mindestens 30 min/St (ohne Grube). Aktuell: {wert} min.",
+      "referenz": "Gemini v8"
+    }
+  ]
+}

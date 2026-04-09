@@ -1,0 +1,119 @@
+{
+  "version": "1.0.0",
+  "id": "rohbau",
+  "name": "Rohbau (GaLaBau, Tiefbau, Erdbau, Abbruch, Straßenbau, Kanalbau)",
+  "kategorie": "rohbau",
+  "aktiv": true,
+
+  "default_zeitwerte": [
+    { "key": "baustelleneinrichtung_galabau", "label": "BE einrichten GaLaBau", "einheit": "min/Psch", "wert": 1800, "geraetezulage": 50, "referenz": "Leitfaden §1" },
+    { "key": "baustelleneinrichtung_raeumen", "label": "BE räumen", "einheit": "min/Psch", "wert": 600, "geraetezulage": 15, "referenz": "Leitfaden §1" },
+    { "key": "baustelleneinrichtung_vorhalten", "label": "BE vorhalten", "einheit": "min/Arbeitstag", "wert": 10, "geraetezulage": 30, "referenz": "Leitfaden §1" },
+    { "key": "dixi_aufstellen", "label": "Dixi aufstellen", "einheit": "min/St", "wert": 120, "geraetezulage": 100, "referenz": "Leitfaden §1" },
+    { "key": "wc_container_aufstellen", "label": "WC-Container aufstellen", "einheit": "min/St", "wert": 1200, "geraetezulage": 50, "referenz": "Leitfaden §1" },
+    { "key": "bauzaun_herstellen", "label": "Bauzaun herstellen", "einheit": "min/m", "wert": 10, "geraetezulage": 15, "referenz": "Leitfaden §1" },
+    { "key": "bauzaun_versetzen", "label": "Bauzaun versetzen", "einheit": "min/m", "wert": 5, "geraetezulage": 5, "referenz": "Leitfaden §1" },
+    { "key": "bauzaun_aufstellen", "label": "Bauzaun aufstellen", "einheit": "min/m", "wert": 3, "geraetezulage": 5, "referenz": "Gemini v8 Regel 4" },
+    { "key": "bauzaun_umsetzen", "label": "Bauzaun umsetzen", "einheit": "min/m", "wert": 5, "geraetezulage": 5, "referenz": "Gemini v8 Regel 4" },
+
+    { "key": "aushub_grossmaschine", "label": "Aushub Großmaschine", "einheit": "min/m³", "wert": 2, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+    { "key": "oberboden_flaechig_pro_10cm", "label": "Oberboden flächig (+0,5/m² je 10cm)", "einheit": "min/m²", "wert": 0.5, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+    { "key": "einbau_verdichten", "label": "Boden einbauen + verdichten", "einheit": "min/m³", "wert": 2, "geraetezulage": 25, "referenz": "Leitfaden §2", "kommentar": "+1 min je Verdichtungsschicht (Standard 33cm)" },
+    { "key": "transport_innerhalb_bs", "label": "Transport innerhalb BS", "einheit": "min/m³", "wert": 3, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+    { "key": "planieren", "label": "Planieren", "einheit": "min/m²", "wert": 0.5, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+    { "key": "verdichten", "label": "Verdichten", "einheit": "min/m²", "wert": 0.5, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+    { "key": "erdarbeiten_kombiniert", "label": "Erdarbeiten kombiniert", "einheit": "min/m³", "wert": 1, "geraetezulage": 25, "referenz": "Leitfaden §2" },
+
+    { "key": "handarbeit_bk1_4", "label": "Handarbeit BK 1-4", "einheit": "min/m³", "wert": 300, "geraetezulage": 0, "referenz": "Leitfaden §2.3", "kommentar": "240-360 min/m³" },
+    { "key": "minibagger_aushub", "label": "Minibagger Aushub", "einheit": "min/m³", "wert": 10, "geraetezulage": 15, "referenz": "Leitfaden §2.4" },
+    { "key": "minibagger_einbau", "label": "Minibagger Einbau", "einheit": "min/m³", "wert": 10, "geraetezulage": 15, "referenz": "Leitfaden §2.4" },
+
+    { "key": "schuettgut_grossflaechig", "label": "Schüttgut großflächig (>200m²)", "einheit": "min/m³", "wert": 3, "geraetezulage": 25, "referenz": "Leitfaden §3", "kommentar": "+1 min je Schicht" },
+    { "key": "schuettgut_kleinmenge", "label": "Schüttgut Kleinmenge (<200m²)", "einheit": "min/m³", "wert": 20, "geraetezulage": 15, "referenz": "Leitfaden §3" },
+
+    { "key": "pflaster_verlegen", "label": "Pflaster verlegen", "einheit": "min/m²", "wert": 25, "geraetezulage": 5, "referenz": "Leitfaden §4.2", "kommentar": "Mindestens 25 min/m²" },
+    { "key": "bordstein_setzen", "label": "Bordstein setzen", "einheit": "min/lfm", "wert": 15, "geraetezulage": 5, "referenz": "Leitfaden §4.2" },
+    { "key": "bordstein_tiefbord", "label": "Tiefbord setzen", "einheit": "min/lfm", "wert": 12, "geraetezulage": 5, "referenz": "Leitfaden §4.2" },
+    { "key": "plattenbelag_verlegen", "label": "Plattenbelag verlegen", "einheit": "min/m²", "wert": 20, "geraetezulage": 5, "referenz": "Gemini v8" },
+
+    { "key": "schneiden_pflaster_beton", "label": "Schneiden Pflaster/Beton", "einheit": "min/m²", "wert": 187, "geraetezulage": 15, "referenz": "Leitfaden §4.3" },
+    { "key": "schneiden_stahlbeton", "label": "Schneiden Stahlbeton", "einheit": "min/m²", "wert": 300, "geraetezulage": 15, "referenz": "Leitfaden §4.4" },
+    { "key": "schneiden_asphalt", "label": "Schneiden Asphalt", "einheit": "min/m²", "wert": 120, "geraetezulage": 15, "referenz": "Leitfaden §4.5" },
+
+    { "key": "beton_kleinmenge", "label": "Beton Kleinmenge (1-2 m³)", "einheit": "€/m³", "wert": 200, "geraetezulage": 0, "referenz": "Leitfaden §5.1", "kommentar": "Stoffe-Wert, kein Zeitwert" },
+    { "key": "beton_lkw", "label": "Beton LKW-Menge (8 m³)", "einheit": "€/m³", "wert": 150, "geraetezulage": 0, "referenz": "Leitfaden §5.2", "kommentar": "120+30 Pumpe, Stoffe-Wert" },
+    { "key": "betonieren_rein", "label": "Betonieren (rein)", "einheit": "min/m³", "wert": 30, "geraetezulage": 25, "referenz": "Leitfaden §5.1" },
+    { "key": "betonieren_inkl_aushub", "label": "Betonieren inkl. Aushub", "einheit": "min/m³", "wert": 60, "geraetezulage": 25, "referenz": "Leitfaden §5.2", "kommentar": "+25 min/Stelle" },
+    { "key": "betonieren_inkl_schalung", "label": "Betonieren inkl. Schalung", "einheit": "min/m³", "wert": 300, "geraetezulage": 25, "referenz": "Leitfaden §5.3", "kommentar": "+25 min/Stelle" },
+    { "key": "schalung", "label": "Schalung", "einheit": "min/m²", "wert": 25, "geraetezulage": 25, "referenz": "Leitfaden §5.3" },
+
+    { "key": "abbruch_mauerwerk", "label": "Abbruch Mauerwerk", "einheit": "min/m³", "wert": 30, "geraetezulage": 25, "referenz": "Leitfaden §5.4" },
+    { "key": "abbruch_asphalt", "label": "Abbruch Asphalt (Belag!)", "einheit": "min/m²", "wert": 15, "geraetezulage": 25, "referenz": "Leitfaden §5.4" },
+    { "key": "abbruch_beton_unbewehrt", "label": "Abbruch Beton unbewehrt", "einheit": "min/m³", "wert": 45, "geraetezulage": 25, "referenz": "Leitfaden §5.4" },
+    { "key": "abbruch_stahlbeton", "label": "Abbruch Stahlbeton", "einheit": "min/m³", "wert": 90, "geraetezulage": 25, "referenz": "Leitfaden §5.4" },
+
+    { "key": "schacht_setzen", "label": "Schacht setzen", "einheit": "min/St", "wert": 150, "geraetezulage": 25, "referenz": "Leitfaden §5.6" },
+    { "key": "doppelstabmatte", "label": "Doppelstabmatte", "einheit": "min/lfm", "wert": 35, "geraetezulage": 15, "referenz": "Leitfaden §5.6" },
+    { "key": "zaunpfosten", "label": "Zaunpfosten", "einheit": "min/St", "wert": 90, "geraetezulage": 15, "referenz": "Leitfaden §5.6" },
+    { "key": "tor_einbauen", "label": "Tor/Drehflügeltür einbauen", "einheit": "min/St", "wert": 300, "geraetezulage": 15, "referenz": "Leitfaden §5.6" },
+    { "key": "rinne_im_beton", "label": "Rinne im Beton", "einheit": "min/lfm", "wert": 60, "geraetezulage": 15, "referenz": "Leitfaden §5.6" },
+
+    { "key": "hochstamm_pflanzen", "label": "Hochstamm pflanzen", "einheit": "min/St", "wert": 120, "geraetezulage": 15, "referenz": "Leitfaden §6", "kommentar": "Grube separat" },
+    { "key": "hecke_pflanzen", "label": "Hecke pflanzen", "einheit": "min/St", "wert": 4, "geraetezulage": 0.5, "referenz": "Leitfaden §6" },
+    { "key": "strauch_pflanzen", "label": "Strauch pflanzen", "einheit": "min/St", "wert": 6, "geraetezulage": 0.5, "referenz": "Leitfaden §6" },
+    { "key": "rasen_ansaeen", "label": "Rasen ansäen", "einheit": "min/m²", "wert": 0.5, "geraetezulage": 0.5, "referenz": "Leitfaden §6" },
+    { "key": "saatbett_herstellen", "label": "Saatbett herstellen", "einheit": "min/m²", "wert": 1.5, "geraetezulage": 0.5, "referenz": "Leitfaden §6" },
+    { "key": "spielgeraet_aufbauen", "label": "Spielgerät aufbauen", "einheit": "min/St", "wert": 480, "geraetezulage": 5, "referenz": "Leitfaden §6" },
+
+    { "key": "rohrleitung_verlegen", "label": "Rohrleitung verlegen", "einheit": "min/lfm", "wert": 5, "geraetezulage": 15, "referenz": "Gemini v8" },
+    { "key": "zaun_setzen_doppelstab", "label": "Zaun setzen (Doppelstabmatte)", "einheit": "min/lfm", "wert": 10, "geraetezulage": 15, "referenz": "Gemini v8" },
+    { "key": "natursteinmauer", "label": "Natursteinmauer setzen", "einheit": "min/m²", "wert": 45, "geraetezulage": 15, "referenz": "Gemini v8" },
+    { "key": "asphalt_einbauen", "label": "Asphalt einbauen (Fertiger)", "einheit": "min/m²", "wert": 2, "geraetezulage": 25, "referenz": "Gemini v8" },
+    { "key": "betonfertigteile", "label": "Betonfertigteile versetzen", "einheit": "min/St", "wert": 15, "geraetezulage": 25, "referenz": "Gemini v8" },
+    { "key": "feinplanum", "label": "Feinplanum", "einheit": "min/m²", "wert": 2, "geraetezulage": 5, "referenz": "Gemini v8" }
+  ],
+
+  "erschwernis_zuschlaege": [
+    {
+      "id": "leibung_schmalform",
+      "name": "Schmalform / Leibung",
+      "trigger": { "keywords": ["leibung", "laibung", "schmal", "streifen"] },
+      "aufschlag": { "zeit_min_pro_lfm": 1.0 },
+      "referenz": "Interview §10b"
+    },
+    {
+      "id": "einzelfundament",
+      "name": "Einzelfundament Kleinvolumen",
+      "trigger": { "keywords": ["fundament", "einzelfundament"], "max_volumen_m3": 0.1 },
+      "aufschlag": { "zeit_min_pro_stueck": 10.0 },
+      "referenz": "Interview §10b"
+    },
+    {
+      "id": "pflaster_streifen",
+      "name": "Pflasterstreifen (schmale Bahnen)",
+      "trigger": { "keywords": ["streifen", "schmale bahn"] },
+      "aufschlag": { "zeit_min_pro_lfm": 5.0 },
+      "referenz": "Interview §10b"
+    }
+  ],
+
+  "kleinmengen_schwellwerte": {
+    "m2": 10,
+    "lfm": 5,
+    "m3": 0.1,
+    "stueck": 1
+  },
+
+  "konstanten": {
+    "schuttdichte_schotter_t_pro_m3": 1.8,
+    "schuttdichte_sand_t_pro_m3": 1.6,
+    "schuttdichte_mutterboden_t_pro_m3": 1.5,
+    "schuttdichte_asphalt_t_pro_m3": 2.4,
+    "beton_pro_lfm_bord_einseitig_m3": 0.05,
+    "beton_pro_lfm_bord_beidseitig_m3": 0.10,
+    "beton_kleinmenge_preis_m3": 200,
+    "beton_lkw_preis_m3": 150,
+    "verdichtungsschicht_standard_cm": 33,
+    "auflockerungsfaktor_lose_eingebaut": 1.25
+  }
+}

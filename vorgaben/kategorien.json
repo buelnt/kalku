@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "kategorien": [
+    {
+      "id": "rohbau",
+      "name": "Rohbau",
+      "gewerke": ["galabau", "tiefbau", "erdbau", "abbruch", "strassenbau", "kanalbau"]
+    },
+    {
+      "id": "technik",
+      "name": "Technik (TGA)",
+      "gewerke": ["elektro", "solar", "hls"]
+    },
+    {
+      "id": "ausbau",
+      "name": "Ausbau",
+      "gewerke": ["trockenbau", "gips_verputz", "maler", "fliesenleger", "bodenleger"]
+    },
+    {
+      "id": "holz_metall",
+      "name": "Holz & Metall",
+      "gewerke": ["zimmerer", "fenster_tueren", "schlosser_metallbau"]
+    },
+    {
+      "id": "gebaeudehuelle",
+      "name": "Gebäudehülle",
+      "gewerke": ["dachdecker", "geruestbau"]
+    },
+    {
+      "id": "sondergewerke",
+      "name": "Sondergewerke",
+      "gewerke": ["aufzuege", "abdichtungen", "brandschutz", "bodenbeschichtungen", "gleisbau", "brunnenbau"]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "profile": [
+    {
+      "id": "scharf",
+      "name": "Scharf",
+      "beschreibung": "Engster Preis — für Projekte, die man unbedingt gewinnen will",
+      "parameter": {
+        "verrechnungslohn": 75.00,
+        "material_zuschlag": 0.20,
+        "nu_zuschlag": 0.20,
+        "geraete_grundzuschlag": 0.05,
+        "zeitwert_faktor": -15,
+        "geraetezulage_default": 0.30
+      }
+    },
+    {
+      "id": "normal",
+      "name": "Normal",
+      "beschreibung": "Ausgewogener Ansatz — Standardprofil",
+      "parameter": {
+        "verrechnungslohn": 90.00,
+        "material_zuschlag": 0.30,
+        "nu_zuschlag": 0.30,
+        "geraete_grundzuschlag": 0.10,
+        "zeitwert_faktor": 0,
+        "geraetezulage_default": 0.50
+      }
+    },
+    {
+      "id": "grosszuegig",
+      "name": "Großzügig",
+      "beschreibung": "Komfortabler Preis — für Projekte mit hoher Gewinnerwartung",
+      "parameter": {
+        "verrechnungslohn": 105.00,
+        "material_zuschlag": 0.40,
+        "nu_zuschlag": 0.40,
+        "geraete_grundzuschlag": 0.15,
+        "zeitwert_faktor": 10,
+        "geraetezulage_default": 0.75
+      }
+    }
+  ]
+}
