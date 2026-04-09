@@ -1,0 +1,55 @@
+# Node / pnpm
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Electron
+release/
+packages/app/dist-electron/
+packages/app/out/
+
+# Test
+coverage/
+.nyc_output/
+
+# Editor
+.vscode/
+!.vscode/settings.json.example
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Umgebungsvariablen
+.env
+.env.local
+.env.*.local
+
+# Python Sidecar
+packages/sidecar/.venv/
+packages/sidecar/__pycache__/
+packages/sidecar/**/__pycache__/
+packages/sidecar/*.egg-info/
+packages/sidecar/.pytest_cache/
+
+# Claude Code Laufzeit
+.claude/local/
+
+# Test-Fixture-Caches
+test-daten/.cache/
