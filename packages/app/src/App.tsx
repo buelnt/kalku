@@ -28,14 +28,16 @@ export function App(): React.JSX.Element {
   const [projekt, setProjekt] = useState<ProjektState | null>(null);
   const [meldung, setMeldung] = useState<string | null>(null);
 
+  // Profil-Presets
+  const profile = {
+    scharf: { verrechnungslohn: 75, material_zuschlag: 20, nu_zuschlag: 20, zeitwert_faktor: -15, geraetezulage_default: 0.3 },
+    normal: { verrechnungslohn: 90, material_zuschlag: 30, nu_zuschlag: 30, zeitwert_faktor: 0, geraetezulage_default: 0.5 },
+    grosszuegig: { verrechnungslohn: 105, material_zuschlag: 40, nu_zuschlag: 40, zeitwert_faktor: 10, geraetezulage_default: 0.75 },
+  };
+
   // Parameter-State (editierbar)
-  const [parameterForm, setParameterForm] = useState({
-    verrechnungslohn: 90,
-    material_zuschlag: 30,
-    nu_zuschlag: 30,
-    zeitwert_faktor: 0,
-    geraetezulage_default: 0.5,
-  });
+  const [parameterForm, setParameterForm] = useState(profile.normal);
+  const [aktivProfil, setAktivProfil] = useState<"scharf" | "normal" | "grosszuegig">("normal");
 
   // ─── LV Importieren ───
   const handleImport = useCallback(async () => {
@@ -198,6 +200,11 @@ export function App(): React.JSX.Element {
             onImport={handleImport}
             parameterForm={parameterForm}
             onParameterAendern={handleParameterAendern}
+            aktivProfil={aktivProfil}
+            onProfilWaehlen={(p) => {
+              setAktivProfil(p);
+              setParameterForm(profile[p]);
+            }}
           />
         )}
         {seite === "kalkulation" && projekt && (
@@ -250,12 +257,24 @@ function ProjekteSeite(props: {
   onImport: () => void;
   parameterForm: { verrechnungslohn: number; material_zuschlag: number; nu_zuschlag: number; zeitwert_faktor: number; geraetezulage_default: number };
   onParameterAendern: (feld: ParamFeld, wert: number) => void;
+  aktivProfil: "scharf" | "normal" | "grosszuegig";
+  onProfilWaehlen: (p: "scharf" | "normal" | "grosszuegig") => void;
 }): React.JSX.Element {
-  const { parameterForm, onParameterAendern } = props;
+  const { parameterForm, onParameterAendern, aktivProfil, onProfilWaehlen } = props;
 
   return (
     <div>
       <h1 style={{ fontSize: 24, marginBottom: 24 }}>Neues Projekt</h1>
+
+      {/* Profil-Auswahl */}
+      <div style={{ ...cardStyle, marginBottom: 16 }}>
+        <h2 style={{ fontSize: 16, marginBottom: 12 }}>Kalkulationsprofil</h2>
+        <div style={{ display: "flex", gap: 12 }}>
+          <ProfilBtn name="Scharf" id="scharf" aktiv={aktivProfil === "scharf"} beschreibung="Engster Preis — um den Auftrag zu gewinnen" onClick={() => onProfilWaehlen("scharf")} farbe="#dc2626" />
+          <ProfilBtn name="Normal" id="normal" aktiv={aktivProfil === "normal"} beschreibung="Ausgewogener Standardansatz" onClick={() => onProfilWaehlen("normal")} farbe="#2563eb" />
+          <ProfilBtn name="Großzügig" id="grosszuegig" aktiv={aktivProfil === "grosszuegig"} beschreibung="Komfortabler Preis — hohe Gewinnerwartung" onClick={() => onProfilWaehlen("grosszuegig")} farbe="#059669" />
+        </div>
+      </div>
 
       {/* Parameter-Eingabe */}
       <div style={cardStyle}>
@@ -394,6 +413,22 @@ function ParamInput(p: { label: string; wert: number; onChange: (v: number) => v
         style={inputStyle}
       />
     </div>
+  );
+}
+
+function ProfilBtn(p: { name: string; id: string; aktiv: boolean; beschreibung: string; onClick: () => void; farbe: string }): React.JSX.Element {
+  return (
+    <button
+      onClick={p.onClick}
+      style={{
+        flex: 1, padding: "12px 16px", border: `2px solid ${p.aktiv ? p.farbe : "#e2e8f0"}`,
+        borderRadius: 8, background: p.aktiv ? `${p.farbe}10` : "#fff", cursor: "pointer",
+        textAlign: "left", fontFamily: "inherit",
+      }}
+    >
+      <div style={{ fontWeight: 700, fontSize: 14, color: p.aktiv ? p.farbe : "#1e293b" }}>{p.name}</div>
+      <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>{p.beschreibung}</div>
+    </button>
   );
 }
 

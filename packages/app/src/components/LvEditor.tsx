@@ -10,13 +10,16 @@
 import React, { useMemo } from "react";
 import { Decimal, runden } from "@baukalk/datenmodell";
 import type { LvEintrag, Parameter, PositionRechenInput } from "@baukalk/datenmodell";
-import { berechne } from "@baukalk/kern";
+import { berechne, pruefePlausi, scanModifier, type PlausiRegel, type ModifierKeywords, type PlausiErgebnis, type ModifierTreffer } from "@baukalk/kern";
 
 interface LvEditorProps {
   eintraege: LvEintrag[];
   parameter: Parameter;
   werte: Map<string, PositionRechenInput>;
   onWertAendern: (oz: string, feld: keyof PositionRechenInput, wert: number | undefined) => void;
+  plausiRegeln?: PlausiRegel[];
+  modifierKeywords?: ModifierKeywords;
+  gewerk?: string;
 }
 
 const NULL = new Decimal(0);
@@ -29,7 +32,7 @@ function formatEuro(d: Decimal): string {
 }
 
 export function LvEditor(props: LvEditorProps): React.JSX.Element {
-  const { eintraege, parameter, werte, onWertAendern } = props;
+  const { eintraege, parameter, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk } = props;
 
   // EP/GP für alle Positionen berechnen
   const berechnungen = useMemo(() => {
@@ -42,6 +45,34 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
     }
     return map;
   }, [eintraege, parameter, werte]);
+
+  // Plausi-Ergebnisse
+  const plausiMap = useMemo(() => {
+    if (!plausiRegeln) return new Map<string, PlausiErgebnis[]>();
+    const map = new Map<string, PlausiErgebnis[]>();
+    for (const e of eintraege) {
+      if (e.art === "BEREICH") continue;
+      const input = werte.get(e.oz) ?? {};
+      const ergebnisse = pruefePlausi(plausiRegeln, {
+        kurztext: e.kurztext, langtext: e.langtext, einheit: e.einheit,
+        input,
+      }, gewerk ?? "rohbau");
+      if (ergebnisse.length > 0) map.set(e.oz, ergebnisse);
+    }
+    return map;
+  }, [eintraege, werte, plausiRegeln, gewerk]);
+
+  // Modifier-Treffer
+  const modifierMap = useMemo(() => {
+    if (!modifierKeywords) return new Map<string, ModifierTreffer[]>();
+    const map = new Map<string, ModifierTreffer[]>();
+    for (const e of eintraege) {
+      if (e.art === "BEREICH") continue;
+      const treffer = scanModifier(e.kurztext, e.langtext, e.einheit, modifierKeywords);
+      if (treffer.length > 0) map.set(e.oz, treffer);
+    }
+    return map;
+  }, [eintraege, modifierKeywords]);
 
   // Netto-Summe
   const nettoSumme = useMemo(() => {
@@ -88,6 +119,7 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
               <Th w={75} right>M NU €</Th>
               <Th w={85} right>EP €</Th>
               <Th w={90} right>GP €</Th>
+              <Th w={30}>P</Th>
             </tr>
           </thead>
           <tbody>
@@ -138,6 +170,9 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
                   </Td>
                   <Td right bold>{formatEuro(b.ep)}</Td>
                   <Td right bold>{formatEuro(b.gp)}</Td>
+                  <Td>
+                    <PlausiAmpel plausi={plausiMap.get(e.oz)} modifier={modifierMap.get(e.oz)} />
+                  </Td>
                 </tr>
               );
             })}
@@ -156,6 +191,30 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
       </div>
     </div>
   );
+}
+
+// Plausi-Ampel + Modifier-Icons
+function PlausiAmpel(p: { plausi?: PlausiErgebnis[]; modifier?: ModifierTreffer[] }): React.JSX.Element {
+  const fails = p.plausi?.filter((r) => r.status === "FAIL") ?? [];
+  const warns = p.plausi?.filter((r) => r.status === "WARN") ?? [];
+  const mods = p.modifier ?? [];
+
+  const alleNachrichten = [
+    ...fails.map((f) => `FEHLER: ${f.nachricht}`),
+    ...warns.map((w) => `WARNUNG: ${w.nachricht}`),
+    ...mods.map((m) => `${m.typ}: ${m.keyword} → ${m.aktion}`),
+  ].join("\n");
+
+  if (fails.length > 0) {
+    return <span title={alleNachrichten} style={{ cursor: "help", fontSize: 16 }}>🔴</span>;
+  }
+  if (warns.length > 0) {
+    return <span title={alleNachrichten} style={{ cursor: "help", fontSize: 16 }}>🟡</span>;
+  }
+  if (mods.length > 0) {
+    return <span title={alleNachrichten} style={{ cursor: "help", fontSize: 16 }}>🔵</span>;
+  }
+  return <span style={{ fontSize: 16 }}>🟢</span>;
 }
 
 // Hilfs-Komponenten
