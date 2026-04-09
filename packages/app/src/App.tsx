@@ -8,7 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
-import { autoBefuellung, type ZeitwertVorgabe } from "@baukalk/kern";
+import { autoBefuellung } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 
@@ -50,28 +50,15 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      // Vorgaben laden und Auto-Befüllung durchführen
+      // Auto-Befüllung: Positionen automatisch mit Leitfaden-Werten kalkulieren
       const werte = new Map<string, PositionRechenInput>();
-      try {
-        const vorgabenRaw = await window.baukalk.vorgabenLaden(
-          `${process.cwd()}/vorgaben/gewerke/rohbau.json`,
-        );
-        if (vorgabenRaw) {
-          const vorgaben = vorgabenRaw as { default_zeitwerte: ZeitwertVorgabe[] };
-          const treffer = autoBefuellung(lv.eintraege, vorgaben.default_zeitwerte);
-          let befuellt = 0;
-          for (const t of treffer) {
-            if (t.konfidenz !== "niedrig") {
-              werte.set(t.oz, t.input);
-              befuellt++;
-            }
-          }
-          setMeldung(
-            `${lv.anzahl_positionen} Positionen importiert, ${befuellt} automatisch vorausgefüllt aus Gewerk-Defaults.`,
-          );
+      const treffer = autoBefuellung(lv.eintraege);
+      let befuellt = 0;
+      for (const t of treffer) {
+        if (t.konfidenz !== "niedrig") {
+          werte.set(t.oz, t.input);
+          befuellt++;
         }
-      } catch {
-        // Vorgaben nicht gefunden — kein Fehler, nur ohne Auto-Befüllung
       }
 
       const parameter: Parameter = {
@@ -91,7 +78,7 @@ export function App(): React.JSX.Element {
       });
       setSeite("kalkulation");
       setMeldung(
-        `${lv.anzahl_positionen} Positionen importiert aus ${lv.meta.original_datei}`,
+        `${lv.anzahl_positionen} Positionen importiert, ${befuellt} automatisch kalkuliert aus Leitfaden-Vorgaben.`,
       );
       setTimeout(() => setMeldung(null), 3000);
     } catch (err) {
