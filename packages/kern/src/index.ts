@@ -10,3 +10,4 @@ export * from "./modifier-scan.js";
 export * from "./modifier-anwenden.js";
 export * from "./positions-gruppen.js";
 export * from "./plausi.js";
+export * from "./auto-befuellung.js";

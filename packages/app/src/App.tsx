@@ -8,6 +8,7 @@ import React, { useState, useCallback } from "react";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, PositionRechenInput, Parameter } from "@baukalk/datenmodell";
 import { LvEditor } from "./components/LvEditor.js";
+import { autoBefuellung, type ZeitwertVorgabe } from "@baukalk/kern";
 import { VorgabenEditor } from "./components/VorgabenEditor.js";
 import { ProjektSpeichern } from "./components/ProjektSpeichern.js";
 
@@ -49,8 +50,29 @@ export function App(): React.JSX.Element {
         return;
       }
 
-      // Leere Werte-Map erstellen
+      // Vorgaben laden und Auto-Befüllung durchführen
       const werte = new Map<string, PositionRechenInput>();
+      try {
+        const vorgabenRaw = await window.baukalk.vorgabenLaden(
+          `${process.cwd()}/vorgaben/gewerke/rohbau.json`,
+        );
+        if (vorgabenRaw) {
+          const vorgaben = vorgabenRaw as { default_zeitwerte: ZeitwertVorgabe[] };
+          const treffer = autoBefuellung(lv.eintraege, vorgaben.default_zeitwerte);
+          let befuellt = 0;
+          for (const t of treffer) {
+            if (t.konfidenz !== "niedrig") {
+              werte.set(t.oz, t.input);
+              befuellt++;
+            }
+          }
+          setMeldung(
+            `${lv.anzahl_positionen} Positionen importiert, ${befuellt} automatisch vorausgefüllt aus Gewerk-Defaults.`,
+          );
+        }
+      } catch {
+        // Vorgaben nicht gefunden — kein Fehler, nur ohne Auto-Befüllung
+      }
 
       const parameter: Parameter = {
         verrechnungslohn: new Decimal(parameterForm.verrechnungslohn),

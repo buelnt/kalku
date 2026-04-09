@@ -107,8 +107,6 @@ export function parseGaebXml(
   // Rekursiv durch BoQCtgy (Bereiche) und Item (Positionen) gehen
   function parseBoQBody(xml: string, ozPrefix: string, depth: number): void {
     // Bereiche (BoQCtgy)
-    const ctgyPattern = /<BoQCtgy[^>]*>([\s\S]*?)<\/BoQCtgy>/gi;
-    let ctgyMatch: RegExpExecArray | null;
     let ctgyIndex = 0;
 
     // Wir müssen vorsichtig sein mit verschachtelten BoQCtgy
