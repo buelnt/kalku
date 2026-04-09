@@ -1,0 +1,27 @@
+{
+  "name": "@baukalk/import",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LV-Import-Parser für BauKalk Pro (Excel, GAEB, PDF)",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@baukalk/datenmodell": "workspace:*",
+    "decimal.js": "^10.4.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}
