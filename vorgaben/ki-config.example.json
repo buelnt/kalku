@@ -1,0 +1,6 @@
+{
+  "provider": "anthropic",
+  "api_key": "DEIN-API-KEY-HIER-EINTRAGEN",
+  "model": "claude-sonnet-4-20250514",
+  "max_positionen_pro_call": 50
+}

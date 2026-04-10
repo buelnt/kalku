@@ -9,7 +9,7 @@
  */
 import React, { useMemo } from "react";
 import { Decimal, runden } from "@baukalk/datenmodell";
-import type { LvEintrag, Parameter, PositionRechenInput } from "@baukalk/datenmodell";
+import type { LvEintrag, Parameter, PositionRechenInput, WertQuelle } from "@baukalk/datenmodell";
 import { berechne, pruefePlausi, scanModifier, bildePositionsGruppen, type PlausiRegel, type ModifierKeywords, type PlausiErgebnis, type ModifierTreffer, type PositionsGruppe } from "@baukalk/kern";
 
 interface LvEditorProps {
@@ -22,6 +22,14 @@ interface LvEditorProps {
   gewerk?: string;
   /** Quellen-Info pro Position (für Farbkennzeichnung der Stoffe-Spalte). */
   quellenMap?: Map<string, { quelle: string; farbe: string; beschreibung: string }>;
+  /** Callback wenn eine Position angeklickt wird (für Langtext-Sidebar). */
+  onPositionKlick?: (oz: string, shift?: boolean) => void;
+  /** Aktuell aktive Position (für Hervorhebung). */
+  aktivePositionOz?: string | null;
+  /** Zweite Position für Vergleich (Shift+Klick). */
+  vergleichPositionOz?: string | null;
+  /** Detaillierte Quellen-Infos pro Position (für Tooltips pro Zelle). */
+  quellenDetails?: Map<string, WertQuelle[]>;
 }
 
 const NULL = new Decimal(0);
@@ -42,7 +50,7 @@ function formatEuro(d: Decimal | number): string {
 }
 
 export function LvEditor(props: LvEditorProps): React.JSX.Element {
-  const { eintraege, parameter: rawParams, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk, quellenMap } = props;
+  const { eintraege, parameter: rawParams, werte, onWertAendern, plausiRegeln, modifierKeywords, gewerk, quellenMap, onPositionKlick, aktivePositionOz, vergleichPositionOz, quellenDetails } = props;
 
   // Parameter sicher als Decimal (könnten als plain numbers über IPC kommen)
   const parameter = useMemo<Parameter>(() => ({
@@ -169,8 +177,23 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
               if (e.art === "BEREICH") {
                 return (
                   <tr key={`b-${idx}`} style={{ background: "#f8fafc" }}>
-                    <td colSpan={10} style={{ padding: "8px 12px", fontWeight: 700, fontSize: 13, borderBottom: "1px solid #e2e8f0" }}>
+                    <td colSpan={11} style={{ padding: "8px 12px", fontWeight: 700, fontSize: 13, borderBottom: "1px solid #e2e8f0" }}>
                       {e.oz} — {e.kurztext}
+                    </td>
+                  </tr>
+                );
+              }
+
+              if (e.art === "HINWEIS") {
+                return (
+                  <tr
+                    key={`h-${idx}`}
+                    onClick={() => onPositionKlick?.(e.oz || `hinweis-${idx}`)}
+                    style={{ background: "#f0f9ff", cursor: "pointer" }}
+                  >
+                    <td style={{ padding: "4px 6px", color: "#6b7280" }}></td>
+                    <td colSpan={10} style={{ padding: "4px 12px", fontStyle: "italic", color: "#6b7280", fontSize: 11, borderBottom: "1px solid #e2e8f0" }}>
+                      📋 {e.kurztext}
                     </td>
                   </tr>
                 );
@@ -182,8 +205,19 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
 
               const gruppe = gruppenMap.get(e.oz);
 
+              const istAktiv = aktivePositionOz === e.oz;
+              const istVergleich = vergleichPositionOz === e.oz;
               return (
-                <tr key={e.oz} style={{ borderBottom: "1px solid #f1f5f9", background: gruppe ? "#fffbeb" : undefined }}>
+                <tr
+                  key={e.oz}
+                  onClick={(ev) => onPositionKlick?.(e.oz, ev.shiftKey)}
+                  style={{
+                    borderBottom: "1px solid #f1f5f9",
+                    background: istVergleich ? "#fef3c7" : istAktiv ? "#eff6ff" : gruppe ? "#fffbeb" : undefined,
+                    cursor: "pointer",
+                    outline: istVergleich ? "2px solid #f59e0b" : istAktiv ? "2px solid #3b82f6" : undefined,
+                  }}
+                >
                   <Td>
                     {e.oz}
                     {gruppe && (
@@ -200,36 +234,73 @@ export function LvEditor(props: LvEditorProps): React.JSX.Element {
                   <Td>{e.einheit}</Td>
                   <Td right>
                     {(() => {
-                      const qi = quellenMap?.get(e.oz);
-                      const bgColor = qi?.farbe === "gruen" ? "#dcfce7" : qi?.farbe === "gelb" ? "#fefce8" : qi?.farbe === "rot" ? "#fef2f2" : undefined;
+                      const qd = quellenDetails?.get(e.oz);
+                      const xQ = qd?.find((wq) => wq.feld === "stoffe_ek");
+                      let bgColor: string | undefined;
+                      let tooltip: string | undefined;
+                      if (xQ) {
+                        bgColor = xQ.konfidenz === "fest" ? "#dcfce7" : xQ.konfidenz === "berechnet" ? "#fefce8" : "#fff7ed";
+                        tooltip = `${xQ.quelle}: ${xQ.begruendung}`;
+                      } else {
+                        const qi = quellenMap?.get(e.oz);
+                        bgColor = qi?.farbe === "gruen" ? "#dcfce7" : qi?.farbe === "gelb" ? "#fefce8" : qi?.farbe === "orange" ? "#fff7ed" : qi?.farbe === "rot" ? "#fef2f2" : undefined;
+                        tooltip = qi?.beschreibung;
+                      }
                       return (
                         <NumInput
                           wert={input.stoffe_ek != null ? Number(input.stoffe_ek) : undefined}
                           onChange={(v) => onWertAendern(e.oz, "stoffe_ek", v)}
                           hintergrund={bgColor}
-                          tooltip={qi?.beschreibung}
+                          tooltip={tooltip}
                         />
                       );
                     })()}
                   </Td>
-                  <Td right>
-                    <NumInput
-                      wert={input.zeit_min_roh != null ? Number(input.zeit_min_roh) : undefined}
-                      onChange={(v) => onWertAendern(e.oz, "zeit_min_roh", v)}
-                    />
-                  </Td>
-                  <Td right>
-                    <NumInput
-                      wert={input.geraetezulage_eur_h != null ? Number(input.geraetezulage_eur_h) : undefined}
-                      onChange={(v) => onWertAendern(e.oz, "geraetezulage_eur_h", v)}
-                    />
-                  </Td>
-                  <Td right>
-                    <NumInput
-                      wert={input.nu_ek != null ? Number(input.nu_ek) : undefined}
-                      onChange={(v) => onWertAendern(e.oz, "nu_ek", v)}
-                    />
-                  </Td>
+                  {(() => {
+                    const qi = quellenMap?.get(e.oz);
+                    const qd = quellenDetails?.get(e.oz);
+                    // Farbe und Tooltip pro Feld aus quellenDetails
+                    const feldInfo = (feld: string) => {
+                      const q = qd?.find((wq) => wq.feld === feld);
+                      if (!q) {
+                        // Fallback: KI-Farbe wenn keine Detail-Quelle
+                        return { bg: qi?.farbe === "orange" ? "#fff7ed" : undefined, tip: undefined };
+                      }
+                      const bg = q.konfidenz === "fest" ? "#dcfce7" : q.konfidenz === "berechnet" ? "#fefce8" : "#fff7ed";
+                      return { bg, tip: `${q.quelle}: ${q.begruendung}` };
+                    };
+                    const yInfo = feldInfo("zeit_min_roh");
+                    const zInfo = feldInfo("geraetezulage_eur_h");
+                    const mInfo = feldInfo("nu_ek");
+                    return (
+                      <>
+                        <Td right>
+                          <NumInput
+                            wert={input.zeit_min_roh != null ? Number(input.zeit_min_roh) : undefined}
+                            onChange={(v) => onWertAendern(e.oz, "zeit_min_roh", v)}
+                            hintergrund={yInfo.bg}
+                            tooltip={yInfo.tip}
+                          />
+                        </Td>
+                        <Td right>
+                          <NumInput
+                            wert={input.geraetezulage_eur_h != null ? Number(input.geraetezulage_eur_h) : undefined}
+                            onChange={(v) => onWertAendern(e.oz, "geraetezulage_eur_h", v)}
+                            hintergrund={zInfo.bg}
+                            tooltip={zInfo.tip}
+                          />
+                        </Td>
+                        <Td right>
+                          <NumInput
+                            wert={input.nu_ek != null ? Number(input.nu_ek) : undefined}
+                            onChange={(v) => onWertAendern(e.oz, "nu_ek", v)}
+                            hintergrund={mInfo.bg}
+                            tooltip={mInfo.tip}
+                          />
+                        </Td>
+                      </>
+                    );
+                  })()}
                   <Td right bold>{formatEuro(b.ep)}</Td>
                   <Td right bold>{formatEuro(b.gp)}</Td>
                   <Td>

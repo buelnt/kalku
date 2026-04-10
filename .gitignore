@@ -36,10 +36,14 @@ coverage/
 # OS
 Thumbs.db
 
-# Umgebungsvariablen
+# Umgebungsvariablen & Secrets
 .env
 .env.local
 .env.*.local
+vorgaben/ki-config.json
+
+# Release-Builds (zu groß für Git)
+dist-release/
 
 # Python Sidecar
 packages/sidecar/.venv/

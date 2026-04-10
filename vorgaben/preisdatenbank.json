@@ -84,20 +84,124 @@
       "datum": "2026-04-09"
     },
     {
-      "suchbegriff": "entsorgung boden bm-0",
-      "material": "Bodenverwertung BM-0",
-      "preis_pro_einheit": 8,
+      "suchbegriff": "bm-0",
+      "material": "Bodenverwertung/Entsorgung BM-0 (unbelastet)",
+      "preis_pro_einheit": 18,
       "einheit": "t",
-      "quelle": "Erfahrungswert",
-      "datum": "2026-04-09"
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
     },
     {
-      "suchbegriff": "entsorgung boden bm-f2",
-      "material": "Bodenentsorgung BM-F2 (belastet)",
+      "suchbegriff": "bm-0*",
+      "material": "Bodenentsorgung BM-0* (leicht belastet)",
+      "preis_pro_einheit": 25,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "bm-f0",
+      "material": "Bodenentsorgung BM-F0* (belastet Stufe 0)",
+      "preis_pro_einheit": 35,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "bm-f1",
+      "material": "Bodenentsorgung BM-F1 (belastet Stufe 1)",
+      "preis_pro_einheit": 45,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "bm-f2",
+      "material": "Bodenentsorgung BM-F2 (belastet Stufe 2)",
       "preis_pro_einheit": 55,
       "einheit": "t",
-      "quelle": "Erfahrungswert",
-      "datum": "2026-04-09"
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung grünschnitt",
+      "material": "Entsorgung Grünschnitt",
+      "preis_pro_einheit": 50,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung holz unbehandelt",
+      "material": "Entsorgung Holz unbehandelt",
+      "preis_pro_einheit": 80,
+      "einheit": "m³",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung holz behandelt",
+      "material": "Entsorgung Holz behandelt/beschichtet",
+      "preis_pro_einheit": 150,
+      "einheit": "m³",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung beton",
+      "material": "Entsorgung Beton/RC-Material",
+      "preis_pro_einheit": 10,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung schotter",
+      "material": "Entsorgung Schotter (REC-fähig)",
+      "preis_pro_einheit": 10,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung asphalt",
+      "material": "Entsorgung Asphalt (ohne Schadstoffe)",
+      "preis_pro_einheit": 15,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung asphalt schadstoff",
+      "material": "Entsorgung Asphalt (teer-/schadstoffhaltig)",
+      "preis_pro_einheit": 70,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung kunststoff",
+      "material": "Entsorgung Kunststoff",
+      "preis_pro_einheit": 300,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung müll",
+      "material": "Entsorgung Hausmüll/Mischabfall",
+      "preis_pro_einheit": 300,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
+    },
+    {
+      "suchbegriff": "entsorgung erdmassen",
+      "material": "Entsorgung Erdmassen (Standard)",
+      "preis_pro_einheit": 18,
+      "einheit": "t",
+      "quelle": "Vorgabe Master 2026-04-10",
+      "datum": "2026-04-10"
     }
   ]
 }

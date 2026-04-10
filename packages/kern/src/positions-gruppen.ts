@@ -96,7 +96,8 @@ function istKleinmenge(
   }
 
   if (schwelle === undefined) return false;
-  return menge.lt(schwelle);
+  const mengeNum = typeof menge === "number" ? menge : (menge?.toNumber?.() ?? Number(menge));
+  return mengeNum < schwelle;
 }
 
 /**

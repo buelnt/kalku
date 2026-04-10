@@ -69,6 +69,32 @@ export const positionBerechnungSchema = z
 export type PositionBerechnung = z.infer<typeof positionBerechnungSchema>;
 
 /**
+ * Quellen-Annotation für einen einzelnen Wert einer Position.
+ * Dokumentiert woher der Wert kommt und warum er so ist.
+ */
+export interface WertQuelle {
+  /** Welches Feld dieser Wert betrifft. */
+  feld: "stoffe_ek" | "zeit_min_roh" | "geraetezulage_eur_h" | "nu_ek";
+  /** Der gesetzte Wert. */
+  wert: number;
+  /** Quelle: z.B. "Leitfaden §2", "Preisdatenbank", "Angebot braun-steine", "KI-Berechnung" */
+  quelle: string;
+  /** Regel-ID wenn aus kalk-regeln.json, z.B. "R_aushub_grossmaschine" */
+  regel_id?: string;
+  /** Menschenlesbare Begründung, z.B. "Aushub Großmaschine: 2 min/m³ × 1m Tiefe = 2 min/m" */
+  begruendung: string;
+  /** Wie sicher ist der Wert? fest=Leitfaden/Angebot, berechnet=Formel/PDB, geschaetzt=KI */
+  konfidenz: "fest" | "berechnet" | "geschaetzt";
+  /** Vergleichspositionen die als Referenz dienten */
+  vergleich_positionen?: string[];
+}
+
+/**
+ * Alle Quellen-Annotationen für eine Position.
+ */
+export type PositionQuellen = WertQuelle[];
+
+/**
  * Eine vollständige LV-Position mit Metadaten und Rechenwerten.
  *
  * Für den Rechenkern in M1 sind nur `menge` und `rechen_input` relevant;

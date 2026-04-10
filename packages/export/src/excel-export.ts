@@ -49,11 +49,11 @@ import { berechne } from "@baukalk/kern";
 export interface ProjektMeta {
   auftraggeber: string;
   leistung: string;
-  bauvorhaben: string;
+  bauvorhaben?: string;
   bieter: string;
   vergabenummer?: string;
   abgabedatum?: string;
-  mwst_satz: number;
+  mwst_satz?: number;
   personal?: number;
 }
 
@@ -72,6 +72,8 @@ export interface ExportOptionen {
   werte: PositionWerte;
   /** Projekt-Metadaten für den Kopf. */
   meta: ProjektMeta;
+  /** Quellen-Annotationen pro Position (optional, für Zell-Kommentare). */
+  quellenDetails?: Map<string, Array<{ feld: string; quelle: string; begruendung: string }>>;
 }
 
 // Spalten-Konstanten (1-basiert wie ExcelJS)
@@ -116,7 +118,17 @@ const NULL = new Decimal(0);
 export async function exportExcelLv3(
   optionen: ExportOptionen,
 ): Promise<ExcelJS.Workbook> {
-  const { lv, parameter, werte, meta } = optionen;
+  const { lv, werte, meta } = optionen;
+  // Parameter-Werte von IPC können plain numbers sein → zu Decimal konvertieren
+  const ensureDec = (v: unknown): Decimal =>
+    v instanceof Decimal ? v : new Decimal(Number(v));
+  const parameter = {
+    verrechnungslohn: ensureDec(optionen.parameter.verrechnungslohn),
+    material_zuschlag: ensureDec(optionen.parameter.material_zuschlag),
+    nu_zuschlag: ensureDec(optionen.parameter.nu_zuschlag),
+    zeitwert_faktor: ensureDec(optionen.parameter.zeitwert_faktor),
+    geraetezulage_default: ensureDec(optionen.parameter.geraetezulage_default),
+  };
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Kalkulation", {
     views: [{ showGridLines: true }],
@@ -170,19 +182,41 @@ export async function exportExcelLv3(
       continue;
     }
 
+    if (eintrag.art === "HINWEIS") {
+      // Hinweis-Zeile (Vorbemerkung) — keine Berechnung, nur Text
+      const row = ws.getRow(currentRow);
+      row.getCell(COL.BEZ).value = eintrag.kurztext;
+      row.getCell(COL.BEZ).font = { italic: true, color: { argb: "FF6B7280" } };
+      currentRow++;
+      continue;
+    }
+
     // Position-Zeile
     const posWerte = werte.get(eintrag.oz);
-    const input: PositionRechenInput = posWerte ?? {
-      stoffe_ek: undefined,
-      zeit_min_roh: undefined,
-      geraetezulage_eur_h: undefined,
-      nu_ek: undefined,
-    };
+    const toDec = (v: unknown): Decimal | undefined =>
+      v != null ? (v instanceof Decimal ? v : new Decimal(Number(v))) : undefined;
+    const input: PositionRechenInput = posWerte
+      ? {
+          stoffe_ek: toDec(posWerte.stoffe_ek),
+          zeit_min_roh: toDec(posWerte.zeit_min_roh),
+          geraetezulage_eur_h: toDec(posWerte.geraetezulage_eur_h),
+          nu_ek: toDec(posWerte.nu_ek),
+        }
+      : {
+          stoffe_ek: undefined,
+          zeit_min_roh: undefined,
+          geraetezulage_eur_h: undefined,
+          nu_ek: undefined,
+        };
 
-    const menge = eintrag.menge ?? NULL;
+    const mengeRaw = eintrag.menge ?? NULL;
+    const menge = mengeRaw instanceof Decimal ? mengeRaw : new Decimal(Number(mengeRaw));
     const ergebnis = berechne(input, menge, parameter);
 
     const row = ws.getRow(currentRow);
+
+    // Prüfe ob Position unbepreist ist (alle Eingaben = 0)
+    const istUnbepreist = ergebnis.ep.isZero();
 
     // Kundenansicht (A-F)
     row.getCell(COL.POS).value = ` ${eintrag.oz}`;
@@ -191,6 +225,16 @@ export async function exportExcelLv3(
     row.getCell(COL.EINHEIT).value = eintrag.einheit ?? "";
     row.getCell(COL.EP).value = runden(ergebnis.ep).toNumber();
     row.getCell(COL.GP).value = runden(ergebnis.gp).toNumber();
+
+    // Unbepreiste Positionen rot markieren
+    if (istUnbepreist) {
+      const roteFuell: ExcelJS.FillPattern = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFEE2E2" } };
+      const roteSchrift: Partial<ExcelJS.Font> = { color: { argb: "FFDC2626" } };
+      for (let c = 1; c <= 13; c++) {
+        row.getCell(c).fill = roteFuell;
+        row.getCell(c).font = { ...row.getCell(c).font, ...roteSchrift };
+      }
+    }
 
     // Kunden-Info-Spalten (I-M)
     row.getCell(COL.I_EP_EK).value = (input.stoffe_ek ?? NULL).toNumber() || undefined;
@@ -236,6 +280,27 @@ export async function exportExcelLv3(
       row.getCell(col).numFmt = '#,##0.00';
     }
 
+    // Quellen als Zell-Kommentare (wenn verfügbar)
+    if (optionen.quellenDetails) {
+      const qd = optionen.quellenDetails.get(eintrag.oz);
+      if (qd) {
+        const feldToCol: Record<string, number> = {
+          stoffe_ek: COL.X,
+          zeit_min_roh: COL.Y,
+          geraetezulage_eur_h: COL.Z,
+        };
+        for (const q of qd) {
+          const col = feldToCol[q.feld];
+          if (col) {
+            const cell = row.getCell(col);
+            cell.note = {
+              texts: [{ text: `${q.quelle}: ${q.begruendung}` }],
+            } as ExcelJS.Comment;
+          }
+        }
+      }
+    }
+
     // Summen-Tracking
     nettoSumme = nettoSumme.plus(ergebnis.gp);
     sumLohn = sumLohn.plus(menge.mul(ergebnis.lohn_ep));
@@ -266,7 +331,8 @@ export async function exportExcelLv3(
   ws.getRow(8).getCell(COL.GP).value = runden(nettoSumme).toNumber();
   ws.getRow(8).getCell(COL.GP).numFmt = '#,##0.00';
 
-  const mwstBetrag = runden(nettoSumme.mul(new Decimal(meta.mwst_satz)));
+  const mwstSatz = meta.mwst_satz ?? 0.19;
+  const mwstBetrag = runden(nettoSumme.mul(new Decimal(mwstSatz)));
   ws.getRow(9).getCell(COL.GP).value = mwstBetrag.toNumber();
   ws.getRow(9).getCell(COL.GP).numFmt = '#,##0.00';
 

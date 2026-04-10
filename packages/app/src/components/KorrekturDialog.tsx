@@ -23,6 +23,8 @@ interface KorrekturEntscheidung {
   feld: string;
   fuerKunde: boolean;
   fuerGlobal: boolean;
+  /** Neue Regel im Gehirn (kalk-regeln.json) erstellen */
+  insGehirn: boolean;
 }
 
 interface KorrekturDialogProps {
@@ -34,20 +36,20 @@ interface KorrekturDialogProps {
 export function KorrekturDialog(props: KorrekturDialogProps): React.JSX.Element {
   const { abweichungen, onAbschliessen, onAbbrechen } = props;
 
-  const [entscheidungen, setEntscheidungen] = useState<Map<string, { fuerKunde: boolean; fuerGlobal: boolean }>>(
+  const [entscheidungen, setEntscheidungen] = useState<Map<string, { fuerKunde: boolean; fuerGlobal: boolean; insGehirn: boolean }>>(
     () => {
-      const map = new Map<string, { fuerKunde: boolean; fuerGlobal: boolean }>();
+      const map = new Map<string, { fuerKunde: boolean; fuerGlobal: boolean; insGehirn: boolean }>();
       for (const a of abweichungen) {
-        map.set(`${a.oz}:${a.feld}`, { fuerKunde: false, fuerGlobal: false });
+        map.set(`${a.oz}:${a.feld}`, { fuerKunde: false, fuerGlobal: false, insGehirn: false });
       }
       return map;
     },
   );
 
-  const handleToggle = useCallback((key: string, typ: "fuerKunde" | "fuerGlobal") => {
+  const handleToggle = useCallback((key: string, typ: "fuerKunde" | "fuerGlobal" | "insGehirn") => {
     setEntscheidungen((prev) => {
       const neu = new Map(prev);
-      const existing = neu.get(key) ?? { fuerKunde: false, fuerGlobal: false };
+      const existing = neu.get(key) ?? { fuerKunde: false, fuerGlobal: false, insGehirn: false };
       neu.set(key, { ...existing, [typ]: !existing[typ] });
       return neu;
     });
@@ -58,12 +60,13 @@ export function KorrekturDialog(props: KorrekturDialogProps): React.JSX.Element 
     for (const a of abweichungen) {
       const key = `${a.oz}:${a.feld}`;
       const e = entscheidungen.get(key);
-      if (e && (e.fuerKunde || e.fuerGlobal)) {
+      if (e && (e.fuerKunde || e.fuerGlobal || e.insGehirn)) {
         result.push({
           oz: a.oz,
           feld: a.feld,
           fuerKunde: e.fuerKunde,
           fuerGlobal: e.fuerGlobal,
+          insGehirn: e.insGehirn,
         });
       }
     }
@@ -99,12 +102,13 @@ export function KorrekturDialog(props: KorrekturDialogProps): React.JSX.Element 
               <th style={{ ...thStyle, textAlign: "right" }}>Neuer Wert</th>
               <th style={{ ...thStyle, textAlign: "center" }}>Für Kunde</th>
               <th style={{ ...thStyle, textAlign: "center" }}>Global</th>
+              <th style={{ ...thStyle, textAlign: "center" }}>🧠 Gehirn</th>
             </tr>
           </thead>
           <tbody>
             {abweichungen.map((a) => {
               const key = `${a.oz}:${a.feld}`;
-              const e = entscheidungen.get(key) ?? { fuerKunde: false, fuerGlobal: false };
+              const e = entscheidungen.get(key) ?? { fuerKunde: false, fuerGlobal: false, insGehirn: false };
               return (
                 <tr key={key} style={{ borderBottom: "1px solid #f1f5f9" }}>
                   <td style={tdStyle}>
@@ -115,7 +119,7 @@ export function KorrekturDialog(props: KorrekturDialogProps): React.JSX.Element 
                   <td style={{ ...tdStyle, textAlign: "right", color: "#94a3b8" }}>
                     {a.alterWert?.toFixed(2) ?? "—"}
                   </td>
-                  <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600 }}>
+                  <td style={{ ...tdStyle, textAlign: "right", fontWeight: 600, color: "#059669" }}>
                     {a.neuerWert?.toFixed(2) ?? "—"}
                   </td>
                   <td style={{ ...tdStyle, textAlign: "center" }}>
@@ -123,6 +127,14 @@ export function KorrekturDialog(props: KorrekturDialogProps): React.JSX.Element 
                   </td>
                   <td style={{ ...tdStyle, textAlign: "center" }}>
                     <input type="checkbox" checked={e.fuerGlobal} onChange={() => handleToggle(key, "fuerGlobal")} />
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: "center" }}>
+                    <input
+                      type="checkbox"
+                      checked={e.insGehirn}
+                      onChange={() => handleToggle(key, "insGehirn")}
+                      title="Als neue Kalkulationsregel speichern — wird bei zukünftigen Kalkulationen automatisch angewendet"
+                    />
                   </td>
                 </tr>
               );

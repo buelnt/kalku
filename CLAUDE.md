@@ -38,12 +38,54 @@ Diese Regeln sind nicht verhandelbar und gelten für jeden Code-Change:
 - NICHT erst am Ende der gesamten Kalkulation sammeln und dann prüfen.
 - Schlägt die Plausibilitätsprüfung fehl: Position korrigieren, bevor zur nächsten übergegangen wird. Fehler in `lessons.md` festhalten.
 
+## PFLICHT-LEKTÜRE BEI JEDEM SESSIONSTART (nicht verhandelbar)
+
+Bei JEDER neuen Session, bei JEDEM `/clear`, bei JEDER Compaction — diese Dateien ZUERST lesen:
+
+1. **`lessons.md`** — Alle bisherigen Fehler und Korrekturen. NIEMALS einen dort dokumentierten Fehler wiederholen.
+2. **`vorgaben/kalk-regeln.json`** — Die 32 deterministischen Kalkulationsregeln (nur vom Senior bestätigte Leitfaden-Werte)
+3. **`vorgaben/preisdatenbank.json`** — Alle Material- und Entsorgungspreise
+4. **`vorgaben/ki-config.json`** — KI-Konfiguration (API-Key, Modell)
+
+## KALKULATIONSREGELN (Zusammenfassung der wichtigsten Fehlerquellen)
+
+Diese Regeln wurden aus konkreten Fehlern gelernt und dürfen NIEMALS verletzt werden:
+
+1. **X = 0 bei reinen Arbeitsleistungen:** Bauzaun, Abbruch, Ausbau, Boden lösen, Planum, Sichern, Lagern — KEIN Material
+2. **Entsorgungspreise NUR bei Masse-Entsorgung:** Bodenaushub/Schotter/Asphalt entsorgen → X > 0. NICHT bei Spielgerät/Fahrradständer/Möbel entsorgen (das ist Ausbau = X=0)
+3. **Gräben = 20 min/m³** (schmaler Baggerlöffel), NICHT 3 min
+4. **Handarbeit = 240 min/m³ Minimum**, bei felsig bis 600
+5. **Asphalt schneiden = 120 min/m² Schnittfläche × Dicke**, Z=15 (Nasschneider). Bei 9cm → 10,8 min/m
+6. **Keine erfundenen NU-Werte:** M darf nur aus Angeboten oder NU-Trigger-Keywords kommen
+7. **Keine erfundenen Stoffe-Werte:** X darf nur aus Angeboten, Preisdatenbank, oder dem Leitfaden kommen
+8. **BM-Klassen:** BM-0=18€/t, BM-0*=25€/t, BM-F0*=35€/t, BM-F1=45€/t, BM-F2=55€/t
+
+## Drei-Schichten-Architektur (IMMER einhalten)
+
+```
+Schicht 1: DETERMINISTISCHE REGELN (kalk-regeln.json) — kein Spielraum
+    → Nur vom Senior bestätigte Leitfaden-Werte
+    → Jeder Wert mit Quellen-Annotation
+Schicht 2: KI BERECHNUNG — nur für Lücken, KEIN Schätzen
+    → Muss auf Referenz-Positionen aus Schicht 1 verweisen
+    → Wert darf NICHT niedriger sein als vergleichbare Position
+Schicht 3: LERNENDES GEHIRN — Korrekturen werden als neue Regeln gespeichert
+    → Senior ändert Wert → Häkchen "Im Gehirn speichern"
+    → Nächste Kalkulation: Schicht 1 findet die Regel → KI wird nicht gefragt
+```
+
 ## Fehlerlog
 - Siehe @lessons.md für alle bisherigen Korrekturen
 - LIES lessons.md VOR jeder Kalkulations-Aufgabe
+
+## Workflow-Pflicht (verschärft)
+- Nach JEDER kalkulierten Position sofort `plausi.py` laufen lassen.
+- NICHT erst am Ende der gesamten Kalkulation sammeln und dann prüfen.
+- Schlägt die Plausibilitätsprüfung fehl: Position korrigieren, bevor zur nächsten übergegangen wird. Fehler in `lessons.md` festhalten.
 
 ## Bei Compaction bewahren
 - Alle Kalkulationsformeln der aktuellen Session
 - Alle Fehlerkorrekturen
 - Aktuelle Dateistruktur
 - Architektur-Entscheidungen
+- PFLICHT-LEKTÜRE Liste oben

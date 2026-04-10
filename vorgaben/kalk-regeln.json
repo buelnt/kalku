@@ -1,0 +1,444 @@
+{
+  "version": "2.0.0",
+  "beschreibung": "Deterministische Kalkulationsregeln — NUR vom Senior-Kalkulator bestätigte Werte aus Leitfaden v1.3. Alles andere → KI berechnet.",
+  "letzte_aenderung": "2026-04-10",
+  "geaendert_von": "Senior Kalkulator (Korrektur-Dialog)",
+  "regeln": [
+    {
+      "id": "R_001",
+      "keywords": [
+        "baustelle einrichten"
+      ],
+      "Y": 1800,
+      "Z": 50,
+      "quelle": "Leitfaden §1",
+      "begruendung": "BE einrichten GaLaBau, ca. 1 Arbeitstag"
+    },
+    {
+      "id": "R_002",
+      "keywords": [
+        "baustelle räumen"
+      ],
+      "Y": 600,
+      "Z": 15,
+      "quelle": "Leitfaden §1",
+      "begruendung": "BE räumen, ca. halber Tag"
+    },
+    {
+      "id": "R_003",
+      "keywords": [
+        "bauzaun"
+      ],
+      "keywords_oder": [
+        "umsetzen",
+        "versetzen"
+      ],
+      "Y": 5,
+      "Z": 5,
+      "quelle": "Leitfaden §1",
+      "begruendung": "Bauzaun umsetzen"
+    },
+    {
+      "id": "R_004",
+      "keywords": [
+        "bauzaun"
+      ],
+      "keywords_nicht": [
+        "umsetzen",
+        "versetzen",
+        "vorhalten"
+      ],
+      "Y": 10,
+      "Z": 15,
+      "quelle": "Leitfaden §1",
+      "begruendung": "Bauzaun aufstellen/herstellen"
+    },
+    {
+      "id": "R_005",
+      "keywords": [
+        "dixi"
+      ],
+      "keywords_oder": [
+        "aufstellen"
+      ],
+      "Y": 120,
+      "Z": 100,
+      "quelle": "Leitfaden §1",
+      "begruendung": "Dixi aufstellen"
+    },
+    {
+      "id": "R_010",
+      "keywords": [
+        "gräben"
+      ],
+      "Y": 20,
+      "Z": 15,
+      "quelle": "Master-Vorgabe",
+      "begruendung": "Gräben für Leitungen, schmaler Baggerlöffel: 20 min/m³"
+    },
+    {
+      "id": "R_011",
+      "keywords": [
+        "aushub"
+      ],
+      "keywords_nicht": [
+        "hand",
+        "mini",
+        "graben",
+        "gräben",
+        "leitung",
+        "kanal"
+      ],
+      "Y": 2,
+      "Z": 25,
+      "quelle": "Leitfaden §2",
+      "begruendung": "Bodenaushub Großmaschine: 2 min/m³"
+    },
+    {
+      "id": "R_012",
+      "keywords": [
+        "minibagger"
+      ],
+      "Y": 10,
+      "Z": 15,
+      "quelle": "Leitfaden §2.4",
+      "begruendung": "Minibagger: 10 min/m³"
+    },
+    {
+      "id": "R_013",
+      "keywords": [
+        "handarbeit"
+      ],
+      "Y": 240,
+      "Z": 0,
+      "quelle": "Leitfaden §2.3",
+      "begruendung": "Handarbeit BK 1-4: mind. 240 min/m³"
+    },
+    {
+      "id": "R_014",
+      "keywords": [
+        "boden"
+      ],
+      "keywords_oder": [
+        "einbauen",
+        "verdichten"
+      ],
+      "keywords_nicht": [
+        "lösen",
+        "laden",
+        "aushub"
+      ],
+      "Y": 8,
+      "Z": 25,
+      "quelle": "Leitfaden §2",
+      "begruendung": "Boden einbauen+verdichten: 8 min/m³"
+    },
+    {
+      "id": "R_015",
+      "keywords": [
+        "planieren"
+      ],
+      "Y": 0.5,
+      "Z": 25,
+      "quelle": "Leitfaden §2",
+      "begruendung": "Planieren: 0,5 min/m²"
+    },
+    {
+      "id": "R_020",
+      "keywords": [
+        "pflaster"
+      ],
+      "keywords_oder": [
+        "verlegen",
+        "versetzen"
+      ],
+      "Y": 25,
+      "Z": 5,
+      "quelle": "Leitfaden §4.2",
+      "begruendung": "Pflaster verlegen: mind. 25 min/m²"
+    },
+    {
+      "id": "R_021",
+      "keywords": [
+        "bordstein"
+      ],
+      "keywords_oder": [
+        "setzen",
+        "versetzen"
+      ],
+      "Y": 15,
+      "Z": 5,
+      "quelle": "Leitfaden §4.2",
+      "begruendung": "Bordstein setzen: 15 min/lfm"
+    },
+    {
+      "id": "R_022",
+      "keywords": [
+        "tiefbord"
+      ],
+      "keywords_oder": [
+        "setzen"
+      ],
+      "Y": 12,
+      "Z": 5,
+      "quelle": "Leitfaden §4.2",
+      "begruendung": "Tiefbord setzen: 12 min/lfm"
+    },
+    {
+      "id": "R_030",
+      "keywords": [
+        "asphalt"
+      ],
+      "keywords_oder": [
+        "schneiden"
+      ],
+      "Y": 12,
+      "Z": 15,
+      "quelle": "Leitfaden §4.5",
+      "begruendung": "Asphalt schneiden: 120 min/m² × Schnitttiefe"
+    },
+    {
+      "id": "R_031",
+      "keywords": [
+        "beton"
+      ],
+      "keywords_oder": [
+        "schneiden"
+      ],
+      "keywords_nicht": [
+        "stahl"
+      ],
+      "Y": 15,
+      "Z": 15,
+      "quelle": "Leitfaden §4.3",
+      "begruendung": "Beton schneiden: 187 min/m² Schnittfläche"
+    },
+    {
+      "id": "R_032",
+      "keywords": [
+        "stahlbeton"
+      ],
+      "keywords_oder": [
+        "schneiden"
+      ],
+      "Y": 24,
+      "Z": 15,
+      "quelle": "Leitfaden §4.4",
+      "begruendung": "Stahlbeton schneiden: 300 min/m²"
+    },
+    {
+      "id": "R_040",
+      "keywords": [
+        "asphalt"
+      ],
+      "keywords_oder": [
+        "abbrechen",
+        "aufnehmen",
+        "aufbrechen"
+      ],
+      "Y": 2,
+      "Z": 25,
+      "quelle": "Leitfaden §5.4",
+      "begruendung": "Asphaltabbruch: 15 min/m³ → ca. 2 min/m²"
+    },
+    {
+      "id": "R_041",
+      "keywords": [
+        "beton"
+      ],
+      "keywords_oder": [
+        "abbrechen",
+        "aufbrechen"
+      ],
+      "keywords_nicht": [
+        "stahl",
+        "pflaster",
+        "platte",
+        "bord",
+        "rinne"
+      ],
+      "Y": 45,
+      "Z": 25,
+      "quelle": "Leitfaden §5.4",
+      "begruendung": "Betonabbruch unbewehrt: 45 min/m³"
+    },
+    {
+      "id": "R_042",
+      "keywords": [
+        "stahlbeton"
+      ],
+      "keywords_oder": [
+        "abbrechen"
+      ],
+      "Y": 90,
+      "Z": 25,
+      "quelle": "Leitfaden §5.4",
+      "begruendung": "Stahlbetonabbruch: 90 min/m³"
+    },
+    {
+      "id": "R_043",
+      "keywords": [
+        "pflaster"
+      ],
+      "keywords_oder": [
+        "abbrechen",
+        "aufnehmen",
+        "aufbrechen"
+      ],
+      "Y": 4,
+      "Z": 25,
+      "quelle": "Leitfaden §5.4",
+      "begruendung": "Pflasterabbruch: 3-5 min/m²"
+    },
+    {
+      "id": "R_044",
+      "keywords": [
+        "bord"
+      ],
+      "keywords_oder": [
+        "abbrechen",
+        "aufnehmen"
+      ],
+      "Y": 5,
+      "Z": 15,
+      "quelle": "Leitfaden §5.4",
+      "begruendung": "Bordstein abbrechen: 3-5 min/lfm"
+    },
+    {
+      "id": "R_050",
+      "keywords": [
+        "rasen"
+      ],
+      "keywords_oder": [
+        "ansäen",
+        "einsäen",
+        "säen"
+      ],
+      "Y": 2,
+      "Z": 5,
+      "quelle": "Leitfaden §6",
+      "begruendung": "Rasen ansäen: 2 min/m²"
+    },
+    {
+      "id": "R_051",
+      "keywords": [
+        "hochstamm"
+      ],
+      "keywords_oder": [
+        "pflanzen"
+      ],
+      "Y": 120,
+      "Z": 15,
+      "quelle": "Leitfaden §6",
+      "begruendung": "Hochstamm pflanzen: 120 min/Stk"
+    },
+    {
+      "id": "R_052",
+      "keywords": [
+        "hecke"
+      ],
+      "keywords_oder": [
+        "pflanzen"
+      ],
+      "Y": 4,
+      "Z": 5,
+      "quelle": "Leitfaden §6",
+      "begruendung": "Hecke pflanzen: 4 min/Stk"
+    },
+    {
+      "id": "R_053",
+      "keywords": [
+        "strauch",
+        "sträucher"
+      ],
+      "keywords_oder": [
+        "pflanzen"
+      ],
+      "Y": 6,
+      "Z": 5,
+      "quelle": "Leitfaden §6",
+      "begruendung": "Strauch pflanzen: 6 min/Stk"
+    },
+    {
+      "id": "R_060",
+      "keywords": [
+        "schotter"
+      ],
+      "keywords_oder": [
+        "einbauen",
+        "herstellen"
+      ],
+      "Y": 3,
+      "Z": 25,
+      "quelle": "Leitfaden §3",
+      "begruendung": "Schotter einbauen: 3 min/m³"
+    },
+    {
+      "id": "R_061",
+      "keywords": [
+        "frostschutz"
+      ],
+      "keywords_oder": [
+        "einbauen",
+        "herstellen"
+      ],
+      "Y": 3,
+      "Z": 25,
+      "quelle": "Leitfaden §3",
+      "begruendung": "Frostschutz einbauen: 3 min/m³"
+    },
+    {
+      "id": "R_070",
+      "keywords": [
+        "entwässerungsleitung"
+      ],
+      "Y": 8,
+      "Z": 15,
+      "quelle": "Leitfaden",
+      "begruendung": "Entwässerungsleitung verlegen"
+    },
+    {
+      "id": "R_080",
+      "keywords": [
+        "schacht"
+      ],
+      "keywords_oder": [
+        "herstellen",
+        "setzen",
+        "einbauen"
+      ],
+      "Y": 150,
+      "Z": 25,
+      "quelle": "Leitfaden §5.6",
+      "begruendung": "Kontrollschacht: 150 min/Stk"
+    },
+    {
+      "id": "R_081",
+      "keywords": [
+        "doppelstabmatte"
+      ],
+      "Y": 35,
+      "Z": 15,
+      "quelle": "Leitfaden §5.6",
+      "begruendung": "Doppelstabmattenzaun: 35 min/lfm"
+    },
+    {
+      "id": "R_082",
+      "keywords": [
+        "rinne"
+      ],
+      "keywords_oder": [
+        "einbauen",
+        "setzen",
+        "verlegen"
+      ],
+      "keywords_nicht": [
+        "abbrechen"
+      ],
+      "Y": 60,
+      "Z": 15,
+      "quelle": "Leitfaden §5.6",
+      "begruendung": "Rinne einbauen: 60 min/lfm"
+    }
+  ]
+}

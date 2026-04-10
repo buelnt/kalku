@@ -1,30 +1,34 @@
 /**
  * GAEB DA XML Parser (X83/X84/X86/X81)
  *
- * Minimaler Parser für GAEB DA XML Dateien. Liest die Hierarchie und
- * Positionen aus dem XML-Format.
+ * Parser für GAEB DA XML Dateien. Liest die Hierarchie und
+ * Positionen aus dem XML-Format. Unterstützt XML-Namespaces
+ * und tief verschachtelte BoQCtgy-Strukturen.
  *
- * GAEB DA XML Struktur (vereinfacht):
- * <GAEB>
- *   <GAEBInfo>...</GAEBInfo>
+ * GAEB DA XML Struktur:
+ * <GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA83/3.2">
  *   <Award>
  *     <BoQ>
  *       <BoQBody>
- *         <BoQCtgy>              <!-- Bereich/Abschnitt -->
- *           <LblTx>Text</LblTx>
+ *         <BoQCtgy RNoPart="01">
+ *           <LblTx>Baustelleneinrichtung</LblTx>
  *           <BoQBody>
- *             <Itemlist>
- *               <Item>           <!-- Position -->
- *                 <Qty>90</Qty>
- *                 <QU>m2</QU>
- *                 <Description>
- *                   <CompleteText>
- *                     <OutlineText><OutlTxt><TextOutlTxt>Kurztext</TextOutlTxt></OutlTxt></OutlineText>
- *                     <DetailText><Text><TextOutlTxt>Langtext</TextOutlTxt></Text></DetailText>
- *                   </CompleteText>
- *                 </Description>
- *               </Item>
- *             </Itemlist>
+ *             <BoQCtgy RNoPart="01">   <!-- verschachtelt! -->
+ *               <LblTx>Unter-Bereich</LblTx>
+ *               <BoQBody>
+ *                 <Itemlist>
+ *                   <Item RNoPart="0010">
+ *                     <Qty>90</Qty>
+ *                     <QU>m2</QU>
+ *                     <Description>
+ *                       <CompleteText>
+ *                         <OutlineText><OutlTxt><TextOutlTxt>...</TextOutlTxt></OutlTxt></OutlineText>
+ *                       </CompleteText>
+ *                     </Description>
+ *                   </Item>
+ *                 </Itemlist>
+ *               </BoQBody>
+ *             </BoQCtgy>
  *           </BoQBody>
  *         </BoQCtgy>
  *       </BoQBody>
@@ -37,34 +41,82 @@ import { basename } from "node:path";
 import { Decimal } from "@baukalk/datenmodell";
 import type { LvImport, LvEintrag, ImportMeta } from "@baukalk/datenmodell";
 
+// ─── Namespace-tolerante XML-Hilfsfunktionen ──────────────────────────
+
 /**
- * Sehr einfacher XML-Tag-Extraktor (kein vollständiger XML-Parser).
- * Für GAEB-XML reicht das, weil die Struktur konsistent ist.
+ * Erzeugt ein Regex-Pattern das Tags mit oder ohne Namespace-Prefix matcht.
+ * z.B. "BoQCtgy" matcht sowohl <BoQCtgy> als auch <ns:BoQCtgy> oder <gaeb:BoQCtgy>
+ */
+function nsTagPattern(tag: string): string {
+  return `(?:[a-zA-Z0-9_]+:)?${tag}`;
+}
+
+/**
+ * Findet alle top-level Vorkommen eines Tags (nesting-sicher).
+ * Berücksichtigt XML-Namespaces.
+ */
+function findTopLevelBlocks(xml: string, tag: string): string[] {
+  const blocks: string[] = [];
+  const openRe = new RegExp(`<${nsTagPattern(tag)}[\\s>/]`, "g");
+
+  let match: RegExpExecArray | null;
+  while ((match = openRe.exec(xml)) !== null) {
+    const startIdx = match.index;
+    let nestLevel = 0;
+    let pos = startIdx;
+    let endIdx = -1;
+
+    while (pos < xml.length) {
+      const openM = xml.slice(pos).match(new RegExp(`^<${nsTagPattern(tag)}[\\s>/]`));
+      if (openM) {
+        nestLevel++;
+        pos += openM[0].length;
+        continue;
+      }
+
+      const closeM = xml.slice(pos).match(new RegExp(`^<\\/(?:[a-zA-Z0-9_]+:)?${tag}>`));
+      if (closeM) {
+        nestLevel--;
+        if (nestLevel === 0) {
+          endIdx = pos + closeM[0].length;
+          break;
+        }
+        pos += closeM[0].length;
+        continue;
+      }
+
+      pos++;
+    }
+
+    if (endIdx === -1) break;
+    blocks.push(xml.slice(startIdx, endIdx));
+    openRe.lastIndex = endIdx;
+  }
+
+  return blocks;
+}
+
+/**
+ * Holt den Inhalt des ERSTEN Vorkommens eines Tags (namespace-tolerant).
+ * Für einfache, nicht verschachtelte Tags wie LblTx, Qty, QU etc.
  */
 function getTagContent(xml: string, tag: string): string | null {
-  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i");
+  const re = new RegExp(`<${nsTagPattern(tag)}[^>]*>([\\s\\S]*?)<\\/(?:[a-zA-Z0-9_]+:)?${tag}>`, "i");
   const m = xml.match(re);
   return m ? m[1]!.trim() : null;
 }
 
-function getAllTags(xml: string, tag: string): string[] {
-  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "gi");
-  const results: string[] = [];
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(xml)) !== null) {
-    results.push(m[1]!);
-  }
-  return results;
-}
-
+/**
+ * Holt ein Attribut aus dem öffnenden Tag (namespace-tolerant).
+ */
 function getAttr(xml: string, tag: string, attr: string): string | null {
-  const re = new RegExp(`<${tag}[^>]*\\s${attr}="([^"]*)"`, "i");
+  const re = new RegExp(`<${nsTagPattern(tag)}[^>]*\\s${attr}="([^"]*)"`, "i");
   const m = xml.match(re);
   return m ? m[1]! : null;
 }
 
 function stripTags(html: string): string {
-  return html.replace(/<[^>]+>/g, "").trim();
+  return html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 }
 
 function ozTiefe(oz: string): number {
@@ -79,6 +131,15 @@ function findParentIndex(eintraege: LvEintrag[], tiefe: number): number | null {
 }
 
 /**
+ * Entfernt den äußeren Tag und gibt den Inhalt zurück.
+ */
+function stripOuterTag(block: string, tag: string): string {
+  const openRe = new RegExp(`^<${nsTagPattern(tag)}[^>]*>`);
+  const closeRe = new RegExp(`<\\/(?:[a-zA-Z0-9_]+:)?${tag}>$`);
+  return block.replace(openRe, "").replace(closeRe, "").trim();
+}
+
+/**
  * Parst eine GAEB DA XML Datei (X83/X84/X86/X81).
  */
 export function parseGaebXml(
@@ -88,7 +149,7 @@ export function parseGaebXml(
   let xmlStr: string;
   let name: string;
 
-  if (typeof input === "string" && !input.startsWith("<?xml") && !input.startsWith("<GAEB")) {
+  if (typeof input === "string" && !input.startsWith("<?xml") && !input.startsWith("<GAEB") && !input.startsWith("<gaeb")) {
     // Es ist ein Dateipfad
     xmlStr = readFileSync(input, "utf-8");
     name = dateiname ?? basename(input);
@@ -96,7 +157,7 @@ export function parseGaebXml(
     xmlStr = input.toString("utf-8");
     name = dateiname ?? "unbekannt.x83";
   } else {
-    xmlStr = input;
+    xmlStr = input as string;
     name = dateiname ?? "unbekannt.x83";
   }
 
@@ -104,47 +165,28 @@ export function parseGaebXml(
   let anzahlPositionen = 0;
   let anzahlBereiche = 0;
 
-  // Rekursiv durch BoQCtgy (Bereiche) und Item (Positionen) gehen
-  function parseBoQBody(xml: string, ozPrefix: string, depth: number): void {
-    // Bereiche (BoQCtgy)
-    let ctgyIndex = 0;
+  /**
+   * Rekursiv durch BoQCtgy (Bereiche) und Item (Positionen) gehen.
+   * Nesting-sicher: findet top-level BoQCtgy und Itemlist-Blöcke korrekt.
+   */
+  function parseBoQBody(bodyContent: string, ozPrefix: string, depth: number): void {
+    // 1. Top-level BoQCtgy-Blöcke in diesem Body finden
+    const ctgyBlocks = findTopLevelBlocks(bodyContent, "BoQCtgy");
 
-    // Wir müssen vorsichtig sein mit verschachtelten BoQCtgy
-    // Einfacher Ansatz: top-level BoQCtgy in diesem Body finden
-    const ctgyBlocks: string[] = [];
-    let searchPos = 0;
-    while (true) {
-      const startIdx = xml.indexOf("<BoQCtgy", searchPos);
-      if (startIdx === -1) break;
-
-      // Finde das passende Ende
-      let nestLevel = 0;
-      let pos = startIdx;
-      let endIdx = -1;
-      while (pos < xml.length) {
-        if (xml.startsWith("<BoQCtgy", pos)) {
-          nestLevel++;
-          pos += 8;
-        } else if (xml.startsWith("</BoQCtgy>", pos)) {
-          nestLevel--;
-          if (nestLevel === 0) {
-            endIdx = pos + 10;
-            break;
-          }
-          pos += 10;
-        } else {
-          pos++;
-        }
-      }
-      if (endIdx === -1) break;
-      ctgyBlocks.push(xml.slice(startIdx, endIdx));
-      searchPos = endIdx;
+    // BoQCtgy-Blöcke aus dem Body entfernen, damit wir danach nur noch
+    // die Itemlists finden, die DIREKT in diesem Body liegen (nicht in Sub-BoQCtgy)
+    let bodyOhneCtgy = bodyContent;
+    for (const ctgyBlock of ctgyBlocks) {
+      bodyOhneCtgy = bodyOhneCtgy.replace(ctgyBlock, "");
     }
 
+    let ctgyIndex = 0;
     for (const ctgyBlock of ctgyBlocks) {
       ctgyIndex++;
       const rno = getAttr(ctgyBlock, "BoQCtgy", "RNoPart") ?? String(ctgyIndex).padStart(2, "0");
       const oz = ozPrefix ? `${ozPrefix}.${rno}` : rno;
+
+      // LblTx aus dem BoQCtgy (nicht aus verschachtelten!)
       const lblTx = getTagContent(ctgyBlock, "LblTx") ?? "";
 
       const tiefe = ozTiefe(oz);
@@ -164,45 +206,100 @@ export function parseGaebXml(
       });
       anzahlBereiche++;
 
-      // Inneren BoQBody suchen
-      const innerBody = getTagContent(ctgyBlock, "BoQBody");
-      if (innerBody) {
-        parseBoQBody(innerBody, oz, depth + 1);
+      // Innere BoQBody-Blöcke suchen (es kann mehrere geben)
+      const innerContent = stripOuterTag(ctgyBlock, "BoQCtgy");
+      const innerBodies = findTopLevelBlocks(innerContent, "BoQBody");
+
+      for (const innerBodyBlock of innerBodies) {
+        const innerBodyContent = stripOuterTag(innerBodyBlock, "BoQBody");
+        parseBoQBody(innerBodyContent, oz, depth + 1);
       }
     }
 
-    // Positionen (Item) in Itemlist
-    const itemlistContent = getTagContent(xml, "Itemlist");
-    if (itemlistContent) {
-      const items = getAllTags(itemlistContent, "Item");
-      for (const item of items) {
-        const rno = getAttr(`<Item ${item}`, "Item", "RNoPart") ??
-          getTagContent(item, "RNoPart") ?? String(items.indexOf(item) + 1).padStart(4, "0");
+    // 2. Top-level Itemlist-Blöcke finden — NUR die, die direkt in diesem Body
+    //    liegen, nicht in verschachtelten BoQCtgy
+    const itemlistBlocks = findTopLevelBlocks(bodyOhneCtgy, "Itemlist");
+
+    for (const itemlistBlock of itemlistBlocks) {
+      const itemlistContent = stripOuterTag(itemlistBlock, "Itemlist");
+
+      // Remark-Blöcke als HINWEIS-Einträge importieren
+      const remarkBlocks = findTopLevelBlocks(itemlistContent, "Remark");
+      for (const remarkBlock of remarkBlocks) {
+        const remarkContent = stripOuterTag(remarkBlock, "Remark");
+        let hinweisText = "";
+        const outlineTxt = getTagContent(remarkContent, "OutlTxt");
+        if (outlineTxt) {
+          const textOutl = getTagContent(outlineTxt, "TextOutlTxt");
+          hinweisText = stripTags(textOutl ?? outlineTxt);
+        }
+        if (!hinweisText) {
+          const textOutlTxt = getTagContent(remarkContent, "TextOutlTxt");
+          if (textOutlTxt) hinweisText = stripTags(textOutlTxt);
+        }
+        // Langtext aus DetailTxt
+        let hinweisLang: string | undefined;
+        const detailTxt = getTagContent(remarkContent, "DetailTxt");
+        if (detailTxt) hinweisLang = stripTags(detailTxt);
+        if (!hinweisLang) {
+          const textEl = getTagContent(remarkContent, "Text");
+          if (textEl) hinweisLang = stripTags(textEl);
+        }
+
+        if (hinweisText || hinweisLang) {
+          const tiefe = ozTiefe(ozPrefix || "0") + 1;
+          eintraege.push({
+            oz: "",
+            art: "HINWEIS",
+            kurztext: hinweisText || "Hinweis",
+            langtext: hinweisLang,
+            menge: undefined,
+            einheit: undefined,
+            ep: undefined,
+            gp: undefined,
+            tiefe,
+            parent_index: findParentIndex(eintraege, tiefe),
+          });
+        }
+      }
+
+      // Items als Positionen
+      const items = findTopLevelBlocks(itemlistContent, "Item");
+
+      let itemIndex = 0;
+      for (const itemBlock of items) {
+        itemIndex++;
+        const itemContent = stripOuterTag(itemBlock, "Item");
+
+        const rno = getAttr(itemBlock, "Item", "RNoPart") ?? String(itemIndex).padStart(4, "0");
         const oz = ozPrefix ? `${ozPrefix}.${rno}` : rno;
 
-        const qty = getTagContent(item, "Qty");
-        const qu = getTagContent(item, "QU");
+        const qty = getTagContent(itemContent, "Qty");
+        const qu = getTagContent(itemContent, "QU");
 
         // Texte extrahieren
         let kurztext = "";
         let langtext: string | undefined;
 
-        const outlineTxt = getTagContent(item, "OutlTxt");
+        // OutlineText → OutlTxt → TextOutlTxt
+        const outlineTxt = getTagContent(itemContent, "OutlTxt");
         if (outlineTxt) {
-          kurztext = stripTags(outlineTxt);
+          const textOutl = getTagContent(outlineTxt, "TextOutlTxt");
+          kurztext = stripTags(textOutl ?? outlineTxt);
         }
-        const textOutlTxt = getTagContent(item, "TextOutlTxt");
-        if (textOutlTxt && !kurztext) {
-          kurztext = stripTags(textOutlTxt);
+        if (!kurztext) {
+          const textOutlTxt = getTagContent(itemContent, "TextOutlTxt");
+          if (textOutlTxt) kurztext = stripTags(textOutlTxt);
         }
 
-        const detailText = getTagContent(item, "DetailTxt");
-        if (detailText) {
-          langtext = stripTags(detailText);
+        // DetailText / DetailTxt / Text
+        const detailTxt = getTagContent(itemContent, "DetailTxt");
+        if (detailTxt) {
+          langtext = stripTags(detailTxt);
         }
         if (!langtext) {
-          const detText = getTagContent(item, "Text");
-          if (detText) langtext = stripTags(detText);
+          const detailText = getTagContent(itemContent, "DetailText");
+          if (detailText) langtext = stripTags(detailText);
         }
 
         const menge = qty ? new Decimal(qty.replace(",", ".")) : new Decimal(0);
@@ -226,10 +323,23 @@ export function parseGaebXml(
     }
   }
 
-  // Einstiegspunkt: BoQBody im Award/BoQ
-  const boqBody = getTagContent(xmlStr, "BoQBody");
-  if (boqBody) {
-    parseBoQBody(boqBody, "", 0);
+  // Einstiegspunkt: Erstes BoQBody im Award/BoQ finden
+  // (das äußerste BoQBody, das die gesamte Struktur enthält)
+  const boqBlocks = findTopLevelBlocks(xmlStr, "BoQ");
+  if (boqBlocks.length > 0) {
+    const boqContent = stripOuterTag(boqBlocks[0]!, "BoQ");
+    const bodyBlocks = findTopLevelBlocks(boqContent, "BoQBody");
+    if (bodyBlocks.length > 0) {
+      const bodyContent = stripOuterTag(bodyBlocks[0]!, "BoQBody");
+      parseBoQBody(bodyContent, "", 0);
+    }
+  } else {
+    // Fallback: direkt nach BoQBody suchen
+    const bodyBlocks = findTopLevelBlocks(xmlStr, "BoQBody");
+    if (bodyBlocks.length > 0) {
+      const bodyContent = stripOuterTag(bodyBlocks[0]!, "BoQBody");
+      parseBoQBody(bodyContent, "", 0);
+    }
   }
 
   // Quelle bestimmen

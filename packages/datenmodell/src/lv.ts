@@ -21,6 +21,8 @@ import { dezimalSchema } from "./dezimal.js";
  * ZULAGE = Zuschlagsposition, bezieht sich auf eine Basis-Position
  * WAHL = Wahlposition / Alternativposition
  * EVENTUELL = Eventualposition (Bedarfsposition)
+ * HINWEIS = Vorbemerkung / Hinweistext (kein EP/GP, keine Menge)
+ * BEDARF = Bedarfsposition mit Grundauftrag (BEDARF(MIT GB))
  */
 export const positionArtSchema = z.enum([
   "BEREICH",
@@ -28,6 +30,8 @@ export const positionArtSchema = z.enum([
   "ZULAGE",
   "WAHL",
   "EVENTUELL",
+  "HINWEIS",
+  "BEDARF",
 ]);
 
 export type PositionArt = z.infer<typeof positionArtSchema>;

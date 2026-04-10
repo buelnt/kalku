@@ -1,0 +1,30 @@
+appId: de.kalku.baukalkpro
+productName: BauKalk Pro
+directories:
+  output: ../../dist-release
+mac:
+  category: public.app-category.business
+  target:
+    - target: dmg
+      arch: [universal]
+  icon: null
+dmg:
+  title: BauKalk Pro
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - node_modules/**/*
+  - "!node_modules/.cache"
+asar: true
+extraResources:
+  - from: ../../vorgaben
+    to: vorgaben
+  - from: ../../scripts
+    to: scripts
