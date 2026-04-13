@@ -388,14 +388,14 @@ Komplett ignorieren. Keine Eintragung, keine Berechnung. Z wird automatisch von 
 | Material | Preis | Einheit |
 |----------|-------|---------|
 | Verbundstein 100/200/80 | 17,20 | EUR/m2 |
-| Naturschotter 0/32 | 19,20 | EUR/t |
-| Einfassungsstein Gartenbeetplatte 5/25 | 13,00 | EUR/m |
+| Naturschotter 0/32 | 20,00 | EUR/t |
+| Einfassungsstein Gartenbeetplatte 5/25 | 3,00 | EUR/m |
 | Oberboden/Mutterboden | 18,75 | EUR/t |
 | Frischbeton C20/25 Kleinmenge | 200 | EUR/m3 |
 | Frischbeton C25/30 LKW | 150 | EUR/m3 |
 | Splitt/Brechsand Pflasterbettung | 25 | EUR/t |
-| Frostschutzmaterial 0/45 | 18 | EUR/t |
-| Schotter Tragschicht 0/32 | 22 | EUR/t |
+| Frostschutzmaterial 0/45 | 20 | EUR/t |
+| Schotter Tragschicht 0/32 | 20 | EUR/t |
 
 ---
 

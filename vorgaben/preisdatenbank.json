@@ -14,7 +14,7 @@
     {
       "suchbegriff": "naturschotter 0/32",
       "material": "Naturschotter 0/32",
-      "preis_pro_einheit": 19.20,
+      "preis_pro_einheit": 20.00,
       "einheit": "t",
       "quelle": "Riegelsberg LV3",
       "datum": "2026-03-19"
@@ -22,7 +22,7 @@
     {
       "suchbegriff": "gartenbeetplatte 5/25",
       "material": "Einfassungsstein Gartenbeetplatte 5/25",
-      "preis_pro_einheit": 13.00,
+      "preis_pro_einheit": 3.00,
       "einheit": "m",
       "quelle": "Riegelsberg LV3",
       "datum": "2026-03-19"
@@ -62,7 +62,7 @@
     {
       "suchbegriff": "frostschutz 0/45",
       "material": "Frostschutzmaterial 0/45",
-      "preis_pro_einheit": 18,
+      "preis_pro_einheit": 20,
       "einheit": "t",
       "quelle": "Erfahrungswert",
       "datum": "2026-04-09"
@@ -70,7 +70,7 @@
     {
       "suchbegriff": "schotter tragschicht 0/32",
       "material": "Schotter für Tragschicht 0/32",
-      "preis_pro_einheit": 22,
+      "preis_pro_einheit": 20,
       "einheit": "t",
       "quelle": "Erfahrungswert",
       "datum": "2026-04-09"
