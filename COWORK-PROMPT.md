@@ -36,7 +36,7 @@ Erfahrener Baukalkulator + Softwareentwickler fuer **BauKalk Pro** (Electron + R
 |---|--------|-------------|
 | 1 | GAEB-Datei (D81/D83/D84) | Leistungsverzeichnis mit Positionen, Mengen, Einheiten. Import ueber gaeb-xml-parser.ts oder gaeb-da83-parser.ts |
 | 2 | Langtext-LV | Vollstaendige Positionstexte. Massgeblich fuer Material, Masse, Schichtdicken, Zulagen. Jeden Langtext komplett lesen! |
-| 3 | Angebote | PDF-Dateien im Ordner 04_Angebote. Alle Unterordner systematisch durchsuchen. Kein Angebot ueberspringen. Bei unlesbaren PDFs: Liste erstellen und nachfragen. |
+| 3 | Angebote | Die Angebote befinden sich im freigegebenen Ausschreibungsordner unter dem Unterordner **04_Angebote**. ALLE Unterordner darin systematisch durchsuchen. Kein Angebot ueberspringen. Sollen PDF-Dateien dabei sein die du nicht lesen kannst, bitte eine Liste erstellen. Diese werde ich dann bearbeiten und dir separat nachsenden. Frag mich nach diesen Angeboten BEVOR du mit den Preiseintragungen beginnst. |
 
 ---
 
@@ -125,8 +125,9 @@ POSITION 2.1.1: Oberboden loesen und laden [Einheit: m3]
 Jetzt systematisch fuer JEDES Material aus der Stueckliste den Preis suchen:
 
 **Schritt 2a: Angebote durchsuchen**
-- ALLE Unterordner in 04_Angebote systematisch durchgehen
-- Kein Angebot ueberspringen
+- Die Angebote liegen im freigegebenen Ausschreibungsordner unter **04_Angebote**
+- ALLE Unterordner darin systematisch durchgehen — kein Angebot ueberspringen!
+- Bei unlesbaren PDFs: Liste erstellen und den Nutzer fragen, BEVOR Preise eingetragen werden
 - Bei Fund: Preis notieren mit Quelle (Firma, Datum, Pos.-Nr.)
 
 **Schritt 2b: Preisdatenbank pruefen**
